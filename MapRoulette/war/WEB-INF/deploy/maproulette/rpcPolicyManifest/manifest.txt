@@ -1,0 +1,3 @@
+# Module maproulette
+# RPC service class, partial path of RPC policy file
+com.csoft.maproulette.client.GreetingService, 8E924F9AC84F7AB9A5F079444AAEAD01.gwt.rpc
