@@ -73,7 +73,13 @@
             var directionsService = new google.maps.DirectionsService();
             var geoJSON = "http://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCXAjl_EPBIDiPzgd2Kzsn4ExvlUidESPA&sensor=true&address=";
             var fsq = "https://api.foursquare.com/v2/venues/explore?ll=";
-            var fsqend = "&limit=";
+            var fsqpoints = "&limit=";
+            var fsqcaturl = "&section=";
+            var fsqcats;
+            var fsqqryurl = "&query=";
+            var fsqqry;
+            var fsqrecurl = "&novelty=";
+            var fsqrec;
             var placesJSON = "https://maps.googleapis.com/maps/api/place/search/json?sensor=true&key=AIzaSyCXAjl_EPBIDiPzgd2Kzsn4ExvlUidESPA&location=";
             var placesJSONend = "&rankby=distance&types=establishment"; //radius=";
             var start, end;
@@ -121,6 +127,7 @@
                     $('div.foursquare').html('logged into <a href="http://www.foursquare.com/">foursquare</a>');
                     isFSQ = true;
                 }
+                //directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
                 directionsDisplay = new google.maps.DirectionsRenderer();
                 var mapOptions = {
                     zoom: 12,
@@ -160,6 +167,11 @@
                 placeMarker(event.latLng);
                 });
                 */
+                if(isFSQ) {
+                    $('#regroute').hide('fast');
+                } else {
+                    $('#fsqroute').hide('fast');
+                }
             }
 
             function getRoute(form) {
@@ -169,6 +181,19 @@
                 waynames = new Array();
                 start = $.trim(form.start.value);
                 end = $.trim(form.end.value);
+                if(isFSQ) {
+                    fsqcats = form.categories[form.categories.selectedIndex].value;
+                    fsqqry = $.trim(form.search.value);
+                    if(form.newrec.checked) {
+                        if(form.oldrec.checked) {
+                            fsqrec = "both";
+                        } else {
+                            fsqrec = form.newrec.value;
+                        }
+                    } else {
+                        fsqrec = form.oldrec.value;
+                    }
+                }
                 loadWaypoints(start, end);
                 //getDirections();
             }
@@ -227,7 +252,7 @@
                             distance = Math.sqrt(rise * rise + run * run) * convMiLL;
                             wpDist = distance / numWaypoints;
                             if(numWaypoints == 0) wpDist = distance;
-                            rad = Math.round(wpDist * convMim)/2;
+                            rad = Math.round(wpDist * convMim) / 2;
                             if(rad > 35000) rad = 35000;
                             $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
                             nextWaypoint(point, 1);
@@ -244,7 +269,7 @@
                                     distance = Math.sqrt(rise * rise + run * run) * convMiLL;
                                     wpDist = distance / numWaypoints;
                                     if(numWaypoints == 0) wpDist = distance;
-                                    rad = Math.round(wpDist * convMim)/2;
+                                    rad = Math.round(wpDist * convMim) / 2;
                                     if(rad > 35000) rad = 35000;
                                     $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
                                     nextWaypoint(point, 1);
@@ -281,7 +306,19 @@
                     newPoint = new google.maps.LatLng(lat, lng);
                     if(isFSQ) {
                         // Foursquare API plugin, must be authenticated with oAuth
-                        var fsqurl = fsq + newPoint.toUrlValue() + fsqend + maxWaypoints + '&oauth_token=' + fsq_token + "&radius=" + rad;
+                        var fsqurl = fsq + newPoint.toUrlValue() + fsqpoints + maxWaypoints + '&oauth_token=' + fsq_token + "&v=20120801";
+                        if(fsqcats != "all") {
+                            fsqurl += fsqcaturl + fsqcats;
+                            //rad = rad * 2;
+                        }
+                        if(fsqqry != "") {
+                            fsqurl += fsqqryurl + encodeURIComponent(fsqqry);
+                            //rad = rad * 2;
+                        }
+                        if(fsqrec != "both") {
+                            fsqurl += fsqrecurl + fsqrec;
+                        }
+                        fsqurl += "&radius=" + rad;
                         $.getJSON(fsqurl, function(data) {
                             // fix the following line to check for valid return
                             if(typeof data['response']['warning'] != "undefined") {
@@ -315,24 +352,25 @@
                             nextWaypoint(nextWP, cur + 1);
                         });
                     } else {
+                        /*
                         // Google Places API
                         var placesurl = placesJSON + newPoint.toUrlValue() + placesJSONend; // + rad;
                         $.getJSON(placesurl, function(data) {
-                            if(data.status == google.maps.GeocoderStatus.OK) {
-                                waypoints[cur - 1] = {
-                                    location: data.results[0].name + ',' + data.results[0].vicinity,
-                                    stopover: true
-                                };
-                            } else {
-                                console.log("Places API failed: " + data.status);
-                                waypoints[cur - 1] = {
-                                    location: newPoint.toUrlValue(),
-                                    stopover: true
-                                };
-                            }
-                            nextWaypoint(nextWP, cur + 1);
+                        if(data.status == google.maps.GeocoderStatus.OK) {
+                        waypoints[cur - 1] = {
+                        location: data.results[0].name + ',' + data.results[0].vicinity,
+                        stopover: true
+                        };
+                        } else {
+                        console.log("Places API failed: " + data.status);
+                        waypoints[cur - 1] = {
+                        location: newPoint.toUrlValue(),
+                        stopover: true
+                        };
+                        }
+                        nextWaypoint(nextWP, cur + 1);
                         });
-
+                        */
                         waypoints[cur - 1] = {
                             location: newPoint.toUrlValue(),
                             stopover: true
@@ -414,11 +452,34 @@
         <div id="control">
             <center>
             <h2>maproulette</h2>
-            <form id="routeform" name="route" onSubmit='JavaScript:return false;'>
-                start: <input id="starttxt" type="text" name="start" size="40" />
-                end: <input id="endtxt" type="text" name="end" size="40" />
-                <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)"/>
-            </form>
+            <div id="regform">
+                <form id="regroute" name="route" onSubmit='JavaScript:return false;'>
+                    start: <input id="starttxt" type="text" name="start" size="40" />
+                    end: <input id="endtxt" type="text" name="end" size="40" />
+                    <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)"/>
+                </form>
+            </div>
+            <div id="fsqform">
+                <form id="fsqroute" name="route" onSubmit='JavaScript:return false;'>
+                    start: <input id="starttxt" type="text" name="start" size="40" />
+                    end: <input id="endtxt" type="text" name="end" size="40" />
+                    <br>
+                    category: 
+                    <select name="categories" size="3" id="sections">
+                      <option value="all" selected>all</option>
+                      <option value="food">food</option>
+                      <option value="drinks">drinks</option>
+                      <option value="coffee">coffee</option>
+                      <option value="shops">shops</option>
+                      <option value="arts">arts</option>
+                      <option value="outdoors">outdoors</option>
+                    </select>
+                    search: <input id="search" type="text" name="search" size="40" />
+                    <input type="checkbox" name="new" id="newrec" value="new" checked> new
+                    <input type="checkbox" name="old" id="oldrec" value="old" checked> old
+                    <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)"/>
+                </form>
+            </div>
             <div id="progressbar"></div>
             <div id="notifications"></div>
             <div id="foursquare" class="foursquare">
