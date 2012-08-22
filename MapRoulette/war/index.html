@@ -96,6 +96,7 @@
             var rise, run, distance, wpDist, risestep, runstep, rad;
             var fsq_token;
             var isFSQ;
+            var isDev;
 
             var fsqconfig = {
                 //dev
@@ -121,12 +122,16 @@
 
             function initialize() {
                 isFSQ = false;
+                isDev = false;
                 var pgurl = document.URL;
                 if(pgurl.indexOf('access_token') != -1) {
                     var splitres = pgurl.split('access_token=');
                     fsq_token = splitres[1];
                     $('div.foursquare').html('logged into <a href="http://www.foursquare.com/">foursquare</a>');
                     isFSQ = true;
+                }
+                if(pgurl.indexOf("localhost") != -1) {
+                    isDev = true;
                 }
                 //directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
                 directionsDisplay = new google.maps.DirectionsRenderer();
@@ -146,8 +151,10 @@
                         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                         map.setCenter(initialLocation);
                         Geostart = initialLocation.toUrlValue();
-                        document.getElementById('fsqstart').value = Geostart;
-                        document.getElementById('regstart').value = Geostart;
+                        if(!isDev) {
+                            document.getElementById('fsqstart').value = Geostart;
+                            document.getElementById('regstart').value = Geostart;
+                        }
                         marker = new google.maps.Marker({
                             position: initialLocation,
                             map: map
@@ -176,11 +183,12 @@
                 } else {
                     $('#fsqroute').hide('fast');
                 }
-
-                if(Geostart != "") {
-                    document.getElementById('fsqstart').value = Geostart;
-                    document.getElementById('regstart').value = Geostart;
+                /*
+                if((Geostart != "") && (!isDev)) {
+                document.getElementById('fsqstart').value = Geostart;
+                document.getElementById('regstart').value = Geostart;
                 }
+                */
             }
 
             function getRoute(form) {
@@ -233,15 +241,22 @@
                         */
                     } else {
                         console.log("Geocode start was not successful: " + status);
-                        $.getJSON(geoJSON + orig, function(data) {
-                            if(data.status == google.maps.GeocoderStatus.OK) {
-                                startLL = data.results[0].geometry.location;
-                                nextWaypoint(startLL, 0);
-                            } else {
-                                console.log("Geocode start URL failed:" + data.status);
-                                $("#notifications").show('fast');
-                                $("#notifications").html("whoops! couldn't geocode start. try again!");
-                                document.getElementById("gobtn").disabled = false;
+                        $.ajax({
+                            url: geoJSON + orig,
+                            dataType: 'json',
+                            success: function(data) {
+                                if(data.status == google.maps.GeocoderStatus.OK) {
+                                    startLL = data.results[0].geometry.location;
+                                    nextWaypoint(startLL, 0);
+                                } else {
+                                    console.log("Geocode start URL failed:" + data.status);
+                                    $("#notifications").show('fast');
+                                    $("#notifications").html("whoops! couldn't geocode start. try again!");
+                                    document.getElementById("gobtn").disabled = false;
+                                }
+                            },
+                            error: function(data) {
+                                errfunc(data);
                             }
                         });
                     }
@@ -273,26 +288,33 @@
                             nextWaypoint(point, 1);
                         } else {
                             console.log("Geocode dest failed:" + data.status);
-                            $.getJSON(geoJSON + end, function(data) {
-                                if(data.status == google.maps.GeocoderStatus.OK) {
-                                    endLL = data.results[0].geometry.location;
-                                    rise = (startLL.lng() - endLL.lng());
-                                    run = (startLL.lat() - endLL.lat());
-                                    slope = rise / run;
-                                    risestep = rise / numWaypoints;
-                                    runstep = run / numWaypoints;
-                                    distance = Math.sqrt(rise * rise + run * run) * convMiLL;
-                                    wpDist = distance / numWaypoints;
-                                    if(numWaypoints == 0) wpDist = distance;
-                                    rad = Math.round(wpDist * convMim) / 2;
-                                    if(rad > 35000) rad = 35000;
-                                    $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
-                                    nextWaypoint(point, 1);
-                                } else {
-                                    console.log("Geocode URL dest failed:" + data.status);
-                                    $("#notifications").show('fast');
-                                    $("#notifications").html("whoops! couldn't geocode end. try again!");
-                                    document.getElementById("gobtn").disabled = false;
+                            $.ajax({
+                                url: geoJSON + end,
+                                dataType: 'json',
+                                success: function(data) {
+                                    if(data.status == google.maps.GeocoderStatus.OK) {
+                                        endLL = data.results[0].geometry.location;
+                                        rise = (startLL.lng() - endLL.lng());
+                                        run = (startLL.lat() - endLL.lat());
+                                        slope = rise / run;
+                                        risestep = rise / numWaypoints;
+                                        runstep = run / numWaypoints;
+                                        distance = Math.sqrt(rise * rise + run * run) * convMiLL;
+                                        wpDist = distance / numWaypoints;
+                                        if(numWaypoints == 0) wpDist = distance;
+                                        rad = Math.round(wpDist * convMim) / 2;
+                                        if(rad > 35000) rad = 35000;
+                                        $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
+                                        nextWaypoint(point, 1);
+                                    } else {
+                                        console.log("Geocode URL dest failed:" + data.status);
+                                        $("#notifications").show('fast');
+                                        $("#notifications").html("whoops! couldn't geocode end. try again!");
+                                        document.getElementById("gobtn").disabled = false;
+                                    }
+                                },
+                                error: function(data) {
+                                    errfunc(data);
                                 }
                             });
                         }
@@ -334,37 +356,45 @@
                             fsqurl += fsqrecurl + fsqrec;
                         }
                         fsqurl += "&radius=" + rad;
-                        $.getJSON(fsqurl, function(data) {
-                            // fix the following line to check for valid return
-                            if(typeof data['response']['warning'] != "undefined") {
-                                console.log(data['response']['warning']);
-                                waynames[cur - 1] = "N/A";
-                                waypoints[cur - 1] = {
-                                    location: newPoint.toUrlValue(),
-                                    stopover: true
-                                };
-                            } else {
-                                var name = data['response']['groups'][0]['items'][0]['venue']['name'];
-                                var pl = 0;
-
-                                while(waynames.indexOf(name) != -1) {
-                                    pl++;
-                                    name = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                        $.ajax({
+                            url: fsqurl,
+                            dataType: 'json',
+                            success: function(data) {
+                                if(typeof data['response']['warning'] != "undefined") {
+                                    console.log(data['response']['warning']);
+                                    console.log("trying again, with bigger radius");
+                                    var splitres = fsqurl.split('&radius=');
+                                    newurl = splitres[0];
+                                    newurl += "&radius=" + (rad * 2).toString();
+                                    //newurl.replace(rad.toString, (rad * 2));
+                                    $.ajax({
+                                        url: newurl,
+                                        dataType: 'json',
+                                        success: function(newdata) {
+                                            if(typeof newdata['response']['warning'] != "undefined") {
+                                                console.log(newdata['response']['warning']);
+                                                waynames[cur - 1] = "N/A";
+                                                waypoints[cur - 1] = {
+                                                    location: newPoint.toUrlValue(),
+                                                    stopover: true
+                                                };
+                                            } else {
+                                                storeFsqWaypoint(newdata, cur);
+                                            }
+                                            nextWaypoint(nextWP, cur + 1);
+                                        },
+                                        error: function(newdata) {
+                                            errfunc(newdata);
+                                        }
+                                    });
+                                } else {
+                                    storeFsqWaypoint(data, cur);
+                                    nextWaypoint(nextWP, cur + 1);
                                 }
-
-                                var loc = data['response']['groups'][0]['items'][pl]['venue']['name'];
-                                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['address'];
-                                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['city'];
-                                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['state'];
-                                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['cc'];
-
-                                waynames[cur - 1] = name;
-                                waypoints[cur - 1] = {
-                                    location: loc,
-                                    stopover: true
-                                };
+                            },
+                            error: function(data) {
+                                errfunc(data);
                             }
-                            nextWaypoint(nextWP, cur + 1);
                         });
                     } else {
                         /*
@@ -422,6 +452,28 @@
                 document.getElementById("gobtn").disabled = false;
             }
 
+            function storeFsqWaypoint(data, cur) {
+                var name = data['response']['groups'][0]['items'][0]['venue']['name'];
+                var pl = 0;
+
+                while(waynames.indexOf(name) != -1) {
+                    pl++;
+                    name = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                }
+
+                var loc = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['address'];
+                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['city'];
+                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['state'];
+                loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['cc'];
+
+                waynames[cur - 1] = name;
+                waypoints[cur - 1] = {
+                    location: loc,
+                    stopover: true
+                };
+            }
+
             function modAddresses(dirresult) {
                 var modResult = dirresult;
                 for(var i = 0; i < dirresult.routes[0].legs.length; i++) {
@@ -447,6 +499,14 @@
                     map: map
                 });
                 map.setCenter(location);
+            }
+
+            function errfunc(data) {
+                console.log(data);
+                $("#progressbar").hide('fast');
+                $("#notifications").show('fast');
+                $("#notifications").html("whoops! we ran into an error. try again!");
+                document.getElementById("gobtn").disabled = false;
             }
 
             google.maps.event.addDomListener(window, 'load', initialize);
