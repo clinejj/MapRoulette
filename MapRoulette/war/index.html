@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
     <head>
         <title>maproulette</title>
@@ -26,8 +26,12 @@
 			}
 			
 			#progressbar {
+                display:block;
+                margin:0 auto;
 				height: 15px;
-				width: 200px;	
+				width: 200px;
+				overflow: hidden;
+                text-align: center;
 			}
 			
 			#directions-panel {
@@ -49,6 +53,7 @@
 				border: 1px solid #ccc;
 				box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
 				display: none;
+                text-align: center;
 			}
 			
 			@media print {
@@ -90,13 +95,14 @@
             var waynames;
             var maxWaypoints = 8;
             var numWaypoints;
-            var convMiLL = 69; 			// 69 miles = 1 latitude/longitude (average)
-            var convLLMi = 0.000621371192; // conversion factor for lat/long to miles
+            var convMiLL = 69; 			    // 69 miles = 1 latitude/longitude (average)
+            var convLLMi = 0.000621371192;  // conversion factor for lat/long to miles
             var convMim = 1760; 			// rough miles to meters
             var rise, run, distance, wpDist, risestep, runstep, rad;
             var fsq_token;
             var isFSQ;
             var isDev;
+            var notifications;
 
             var fsqconfig = {
                 //dev
@@ -162,7 +168,6 @@
                     }, function() {
                         map.setCenter(initialLocation);
                     });
-                    // Browser doesn't support Geolocation
                 } else {
                     map.setCenter(initialLocation);
                 }
@@ -170,7 +175,6 @@
 
                 var control = document.getElementById('control');
                 control.style.display = 'block';
-                //map.controls[google.maps.ControlPosition.TOP].push(control);
 
                 //click to add a marker
                 /*
@@ -183,17 +187,14 @@
                 } else {
                     $('#fsqroute').hide('fast');
                 }
-                /*
-                if((Geostart != "") && (!isDev)) {
-                document.getElementById('fsqstart').value = Geostart;
-                document.getElementById('regstart').value = Geostart;
-                }
-                */
+                $("#notifications").hide('fast');
+                $("#progressbar").hide('fast');
             }
 
             function getRoute(form) {
                 document.getElementById("gobtn").disabled = true;
                 $("#notifications").hide('fast');
+                notifications = "";
                 waypoints = new Array();
                 waynames = new Array();
                 start = $.trim(form.start.value);
@@ -232,13 +233,6 @@
                     if(status == google.maps.GeocoderStatus.OK) {
                         startLL = results[0].geometry.location;
                         nextWaypoint(startLL, 0);
-                        /*
-                        map.setCenter(startLL);
-                        var marker = new google.maps.Marker({
-                        map: map,
-                        position: startLL
-                        });
-                        */
                     } else {
                         console.log("Geocode start was not successful: " + status);
                         $.ajax({
@@ -328,17 +322,13 @@
                     // Randomize lat/long
                     if(Math.random() > 0.5) {
                         lat = lat + (Math.random() * (runstep / 4));
-                        //lat = lat + (((Math.random() * convMiLL) % (wpDist)) * convLLMi);
                     } else {
                         lat = lat - (Math.random() * (runstep / 4));
-                        //lat = lat - (((Math.random() * convMiLL) % (wpDist)) * convLLMi);
                     }
                     if(Math.random() > 0.5) {
                         lng = lng + (Math.random() * (risestep / 4));
-                        //lng = lng + (((Math.random() * convMiLL) % (wpDist)) * convLLMi);
                     } else {
                         lng = lng - (Math.random() * (risestep / 4));
-                        //lng = lng - (((Math.random() * convMiLL) % (wpDist)) * convLLMi);
                     }
                     newPoint = new google.maps.LatLng(lat, lng);
                     if(isFSQ) {
@@ -373,11 +363,16 @@
                                         success: function(newdata) {
                                             if(typeof newdata['response']['warning'] != "undefined") {
                                                 console.log(newdata['response']['warning']);
+                                                if(notifications == "") {
+                                                    notifications = "we couldn't as many waypoints as we wanted. try changing your search!";
+                                                }
+                                                /*
                                                 waynames[cur - 1] = "N/A";
                                                 waypoints[cur - 1] = {
-                                                    location: newPoint.toUrlValue(),
-                                                    stopover: true
+                                                location: newPoint.toUrlValue(),
+                                                stopover: true
                                                 };
+                                                */
                                             } else {
                                                 storeFsqWaypoint(newdata, cur);
                                             }
@@ -426,8 +421,10 @@
             }
 
             function getDirections() {
-                waypoints.splice(0, 1);
-                waypoints.splice(waypoints.length - 1, 1);
+                if(!isFSQ) {
+                    waypoints.splice(0, 1);
+                    waypoints.splice(waypoints.length - 1, 1);
+                }
                 var dirrequest = {
                     origin: start,
                     destination: end,
@@ -441,6 +438,10 @@
                             directionsDisplay.setDirections(modAddresses(dirresult));
                         } else {
                             directionsDisplay.setDirections(dirresult);
+                        }
+                        if(notifications != "") {
+                            $("#notifications").show('fast');
+                            $("#notifications").html(notifications);
                         }
                     } else {
                         $("#notifications").show('fast');
@@ -478,17 +479,18 @@
                 var modResult = dirresult;
                 for(var i = 0; i < dirresult.routes[0].legs.length; i++) {
                     // check for waynames != n/a
-                    if(i == 0) {
-                        modResult.routes[0].legs[i].start_address = start;
-                        modResult.routes[0].legs[i].end_address = waypoints[i].location;
-                    } else if(i == (dirresult.routes[0].legs.length - 1)) {
-                        modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
-                        modResult.routes[0].legs[i].end_address = end;
-                    } else {
-                        modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
-                        modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                    if(waypoints[i] != undefined) {
+                        if(i == 0) {
+                            modResult.routes[0].legs[i].start_address = start;
+                            modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                        } else if(i == (dirresult.routes[0].legs.length - 1)) {
+                            modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
+                            modResult.routes[0].legs[i].end_address = end;
+                        } else {
+                            modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
+                            modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                        }
                     }
-
                 }
                 return modResult;
             }
