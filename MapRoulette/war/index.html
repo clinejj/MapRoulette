@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>maproulette</title>
+        <title>otter</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
          <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" rel="stylesheet" /> 
          <style type="text/css">
@@ -86,6 +86,7 @@
             var fsqqry;
             var fsqrecurl = "&novelty=";
             var fsqrec;
+            var transMethod;
             var placesJSON = "https://maps.googleapis.com/maps/api/place/search/json?sensor=true&key=AIzaSyCXAjl_EPBIDiPzgd2Kzsn4ExvlUidESPA&location=";
             var placesJSONend = "&rankby=distance&types=establishment"; //radius=";
             var start, end;
@@ -95,9 +96,9 @@
             var waynames;
             var maxWaypoints = 8;
             var numWaypoints;
-            var convMiLL = 69; 			    // 69 miles = 1 latitude/longitude (average)
+            var convMiLL = 69;              // 69 miles = 1 latitude/longitude (average)
             var convLLMi = 0.000621371192;  // conversion factor for lat/long to miles
-            var convMim = 1760; 			// rough miles to meters
+            var convMim = 1760;             // rough miles to meters
             var rise, run, distance, wpDist, risestep, runstep, rad;
             var fsq_token;
             var isFSQ;
@@ -117,7 +118,7 @@
                 var pgurl = document.URL;
                 var redirect = window.location.href.replace(window.location.hash, '');
                 var url = fsqconfig.authUrl + 'oauth2/authenticate?response_type=token&client_id=';
-                if(pgurl.indexOf("localhost") != -1) {
+                if (pgurl.indexOf("localhost") != -1) {
                     url += fsqconfig.apiKeyDev;
                 } else {
                     url += fsqconfig.apiKey;
@@ -130,13 +131,13 @@
                 isFSQ = false;
                 isDev = false;
                 var pgurl = document.URL;
-                if(pgurl.indexOf('access_token') != -1) {
+                if (pgurl.indexOf('access_token') != -1) {
                     var splitres = pgurl.split('access_token=');
                     fsq_token = splitres[1];
                     $('div.foursquare').html('logged into <a href="http://www.foursquare.com/">foursquare</a>');
                     isFSQ = true;
                 }
-                if(pgurl.indexOf("localhost") != -1) {
+                if (pgurl.indexOf("localhost") != -1) {
                     isDev = true;
                 }
                 //directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
@@ -151,13 +152,13 @@
                 directionsDisplay.setPanel(document.getElementById('directions-panel'));
 
                 // Try W3C Geolocation (Preferred)
-                if(navigator.geolocation) {
+                if (navigator.geolocation) {
                     browserSupportFlag = true;
-                    navigator.geolocation.getCurrentPosition(function(position) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
                         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                         map.setCenter(initialLocation);
                         Geostart = initialLocation.toUrlValue();
-                        if(!isDev) {
+                        if (!isDev) {
                             document.getElementById('fsqstart').value = Geostart;
                             document.getElementById('regstart').value = Geostart;
                         }
@@ -165,7 +166,7 @@
                             position: initialLocation,
                             map: map
                         });
-                    }, function() {
+                    }, function () {
                         map.setCenter(initialLocation);
                     });
                 } else {
@@ -182,7 +183,7 @@
                 placeMarker(event.latLng);
                 });
                 */
-                if(isFSQ) {
+                if (isFSQ) {
                     $('#regroute').hide('fast');
                 } else {
                     $('#fsqroute').hide('fast');
@@ -199,16 +200,17 @@
                 waynames = new Array();
                 start = $.trim(form.start.value);
                 end = $.trim(form.end.value);
-                if((start == "") || (end == "")) {
+                transMethod = form.transport.value;
+                if ((start == "") || (end == "")) {
                     $("#notifications").show('fast');
                     $("#notifications").html("whoops! please enter both start and end points!");
                     document.getElementById("gobtn").disabled = false;
                 } else {
-                    if(isFSQ) {
+                    if (isFSQ) {
                         fsqcats = form.categories[form.categories.selectedIndex].value;
                         fsqqry = $.trim(form.search.value);
-                        if(form.newrec.checked) {
-                            if(form.oldrec.checked) {
+                        if (form.newrec.checked) {
+                            if (form.oldrec.checked) {
                                 fsqrec = "both";
                             } else {
                                 fsqrec = form.newrec.value;
@@ -229,8 +231,8 @@
                 //waypoints[0] = orig;
                 //waypoints[numWaypoints - 1] = dest;
 
-                geocoder.geocode({ 'address': orig }, function(results, status) {
-                    if(status == google.maps.GeocoderStatus.OK) {
+                geocoder.geocode({ 'address': orig }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
                         startLL = results[0].geometry.location;
                         nextWaypoint(startLL, 0);
                     } else {
@@ -238,8 +240,8 @@
                         $.ajax({
                             url: geoJSON + orig,
                             dataType: 'json',
-                            success: function(data) {
-                                if(data.status == google.maps.GeocoderStatus.OK) {
+                            success: function (data) {
+                                if (data.status == google.maps.GeocoderStatus.OK) {
                                     startLL = data.results[0].geometry.location;
                                     nextWaypoint(startLL, 0);
                                 } else {
@@ -249,7 +251,7 @@
                                     document.getElementById("gobtn").disabled = false;
                                 }
                             },
-                            error: function(data) {
+                            error: function (data) {
                                 errfunc(data);
                             }
                         });
@@ -261,12 +263,12 @@
                 var lat;
                 var lng;
 
-                if(cur == (numWaypoints + 2)) {
+                if (cur == (numWaypoints + 2)) {
                     $("#progressbar").progressbar({ value: 100 });
                     getDirections();
-                } else if(cur == 0) {
-                    geocoder.geocode({ 'address': end }, function(results, status) {
-                        if(status == google.maps.GeocoderStatus.OK) {
+                } else if (cur == 0) {
+                    geocoder.geocode({ 'address': end }, function (results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
                             endLL = results[0].geometry.location;
                             rise = (startLL.lng() - endLL.lng());
                             run = (startLL.lat() - endLL.lat());
@@ -275,9 +277,9 @@
                             runstep = run / numWaypoints;
                             distance = Math.sqrt(rise * rise + run * run) * convMiLL;
                             wpDist = distance / numWaypoints;
-                            if(numWaypoints == 0) wpDist = distance;
+                            if (numWaypoints == 0) wpDist = distance;
                             rad = Math.round(wpDist * convMim) / 2;
-                            if(rad > 35000) rad = 35000;
+                            if (rad > 35000) rad = 35000;
                             $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
                             nextWaypoint(point, 1);
                         } else {
@@ -285,8 +287,8 @@
                             $.ajax({
                                 url: geoJSON + end,
                                 dataType: 'json',
-                                success: function(data) {
-                                    if(data.status == google.maps.GeocoderStatus.OK) {
+                                success: function (data) {
+                                    if (data.status == google.maps.GeocoderStatus.OK) {
                                         endLL = data.results[0].geometry.location;
                                         rise = (startLL.lng() - endLL.lng());
                                         run = (startLL.lat() - endLL.lat());
@@ -295,9 +297,9 @@
                                         runstep = run / numWaypoints;
                                         distance = Math.sqrt(rise * rise + run * run) * convMiLL;
                                         wpDist = distance / numWaypoints;
-                                        if(numWaypoints == 0) wpDist = distance;
+                                        if (numWaypoints == 0) wpDist = distance;
                                         rad = Math.round(wpDist * convMim) / 2;
-                                        if(rad > 35000) rad = 35000;
+                                        if (rad > 35000) rad = 35000;
                                         $("#progressbar").progressbar({ value: Math.round((cur / (numWaypoints + 2)) * 100) });
                                         nextWaypoint(point, 1);
                                     } else {
@@ -307,7 +309,7 @@
                                         document.getElementById("gobtn").disabled = false;
                                     }
                                 },
-                                error: function(data) {
+                                error: function (data) {
                                     errfunc(data);
                                 }
                             });
@@ -320,37 +322,37 @@
                     nextWP = new google.maps.LatLng(lat - runstep, lng - risestep);
 
                     // Randomize lat/long
-                    if(Math.random() > 0.5) {
+                    if (Math.random() > 0.5) {
                         lat = lat + (Math.random() * (runstep / 4));
                     } else {
                         lat = lat - (Math.random() * (runstep / 4));
                     }
-                    if(Math.random() > 0.5) {
+                    if (Math.random() > 0.5) {
                         lng = lng + (Math.random() * (risestep / 4));
                     } else {
                         lng = lng - (Math.random() * (risestep / 4));
                     }
                     newPoint = new google.maps.LatLng(lat, lng);
-                    if(isFSQ) {
+                    if (isFSQ) {
                         // Foursquare API plugin, must be authenticated with oAuth
                         var fsqurl = fsq + newPoint.toUrlValue() + fsqpoints + maxWaypoints + '&oauth_token=' + fsq_token + "&v=20120801";
-                        if(fsqcats != "all") {
+                        if (fsqcats != "all") {
                             fsqurl += fsqcaturl + fsqcats;
                             //rad = rad * 2;
                         }
-                        if(fsqqry != "") {
+                        if (fsqqry != "") {
                             fsqurl += fsqqryurl + encodeURIComponent(fsqqry);
                             //rad = rad * 2;
                         }
-                        if(fsqrec != "both") {
+                        if (fsqrec != "both") {
                             fsqurl += fsqrecurl + fsqrec;
                         }
                         fsqurl += "&radius=" + rad;
                         $.ajax({
                             url: fsqurl,
                             dataType: 'json',
-                            success: function(data) {
-                                if(typeof data['response']['warning'] != "undefined") {
+                            success: function (data) {
+                                if (typeof data['response']['warning'] != "undefined") {
                                     console.log(data['response']['warning']);
                                     console.log("trying again, with bigger radius");
                                     var splitres = fsqurl.split('&radius=');
@@ -360,10 +362,10 @@
                                     $.ajax({
                                         url: newurl,
                                         dataType: 'json',
-                                        success: function(newdata) {
-                                            if(typeof newdata['response']['warning'] != "undefined") {
+                                        success: function (newdata) {
+                                            if (typeof newdata['response']['warning'] != "undefined") {
                                                 console.log(newdata['response']['warning']);
-                                                if(notifications == "") {
+                                                if (notifications == "") {
                                                     notifications = "we couldn't as many waypoints as we wanted. try changing your search!";
                                                 }
                                                 /*
@@ -378,7 +380,7 @@
                                             }
                                             nextWaypoint(nextWP, cur + 1);
                                         },
-                                        error: function(newdata) {
+                                        error: function (newdata) {
                                             errfunc(newdata);
                                         }
                                     });
@@ -387,7 +389,7 @@
                                     nextWaypoint(nextWP, cur + 1);
                                 }
                             },
-                            error: function(data) {
+                            error: function (data) {
                                 errfunc(data);
                             }
                         });
@@ -421,7 +423,7 @@
             }
 
             function getDirections() {
-                if(!isFSQ) {
+                if (!isFSQ) {
                     waypoints.splice(0, 1);
                     waypoints.splice(waypoints.length - 1, 1);
                 }
@@ -432,14 +434,23 @@
                     provideRouteAlternatives: false,
                     travelMode: google.maps.TravelMode.DRIVING
                 };
-                directionsService.route(dirrequest, function(dirresult, dirstatus) {
-                    if(dirstatus == google.maps.DirectionsStatus.OK) {
-                        if(isFSQ) {
+                if (transMethod == "driving") {
+                    dirrequest['travelMode'] = google.maps.TravelMode.DRIVING;
+                } else if (transMethod == "transit") {
+                    dirrequest['travelMode'] = google.maps.TravelMode.TRANSIT;
+                } else if (transMethod == "biking") {
+                    dirrequest['travelMode'] = google.maps.TravelMode.BICYCLING;
+                } else if (transMethod == "walking") {
+                    dirrequest['travelMode'] = google.maps.TravelMode.WALKING;
+                }
+                directionsService.route(dirrequest, function (dirresult, dirstatus) {
+                    if (dirstatus == google.maps.DirectionsStatus.OK) {
+                        if (isFSQ) {
                             directionsDisplay.setDirections(modAddresses(dirresult));
                         } else {
                             directionsDisplay.setDirections(dirresult);
                         }
-                        if(notifications != "") {
+                        if (notifications != "") {
                             $("#notifications").show('fast');
                             $("#notifications").html(notifications);
                         }
@@ -457,7 +468,7 @@
                 var name = data['response']['groups'][0]['items'][0]['venue']['name'];
                 var pl = 0;
 
-                while(waynames.indexOf(name) != -1) {
+                while (waynames.indexOf(name) != -1) {
                     pl++;
                     name = data['response']['groups'][0]['items'][pl]['venue']['name'];
                 }
@@ -477,13 +488,13 @@
 
             function modAddresses(dirresult) {
                 var modResult = dirresult;
-                for(var i = 0; i < dirresult.routes[0].legs.length; i++) {
+                for (var i = 0; i < dirresult.routes[0].legs.length; i++) {
                     // check for waynames != n/a
-                    if(waypoints[i] != undefined) {
-                        if(i == 0) {
+                    if (waypoints[i] != undefined) {
+                        if (i == 0) {
                             modResult.routes[0].legs[i].start_address = start;
                             modResult.routes[0].legs[i].end_address = waypoints[i].location;
-                        } else if(i == (dirresult.routes[0].legs.length - 1)) {
+                        } else if (i == (dirresult.routes[0].legs.length - 1)) {
                             modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
                             modResult.routes[0].legs[i].end_address = end;
                         } else {
@@ -527,11 +538,17 @@
     </head>
     <body>
         <div id="control" style="text-align: center">
-            <h2><a href="about.html">maproulette</a></h2>
+            <h2><a href="about.html">otter</a></h2>
             <div id="regform">
                 <form id="regroute" name="route" onSubmit='JavaScript:return false;'>
                     start: <input id="regstart" type="text" name="start" size="40" />
                     end: <input id="regend" type="text" name="end" size="40" />
+                    <select name="transport" id="transport">
+                      <option value="driving" selected>driving</option>
+                      <option value="transit">transit</option>
+                      <option value="biking">biking</option>
+                      <option value="walking">walking</option>
+                    </select>
                     <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)"/>
                 </form>
             </div>
@@ -541,7 +558,7 @@
                     end: <input id="fsqend" type="text" name="end" size="40" />
                     <br>
                     category: 
-                    <select name="categories" size="3" id="sections">
+                    <select name="categories" id="sections">
                       <option value="all" selected>all</option>
                       <option value="food">food</option>
                       <option value="drinks">drinks</option>
@@ -553,6 +570,12 @@
                     search: <input id="search" type="text" name="search" size="40" />
                     <input type="checkbox" name="new" id="newrec" value="new" checked> new
                     <input type="checkbox" name="old" id="oldrec" value="old" checked> old
+                    <select name="transport" id="transport">
+                      <option value="driving" selected>driving</option>
+                      <option value="transit">transit</option>
+                      <option value="biking">biking</option>
+                      <option value="walking">walking</option>
+                    </select>
                     <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)"/>
                 </form>
             </div>
