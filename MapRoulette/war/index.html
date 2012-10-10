@@ -71,6 +71,8 @@
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyCXAjl_EPBIDiPzgd2Kzsn4ExvlUidESPA&sensor=true"></script>
+        <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/oauth.js"></script>
+        <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/sha1.js"></script>
         <script type="text/javascript">
             var map;
             var initialLocation = new google.maps.LatLng(41.2, -112);
@@ -104,6 +106,7 @@
             var isFSQ;
             var isDev;
             var notifications;
+            var yelpparameters;
 
             var fsqconfig = {
                 //dev
@@ -113,6 +116,27 @@
                 authUrl: 'https://foursquare.com/',
                 apiUrl: 'https://api.foursquare.com/'
             };
+
+            var yelpauth = {
+                //
+                // Update with your auth tokens.
+                //
+                consumerKey: "ga7nws5hpwm2dOFhDvxWyQ",
+                consumerSecret: "uTPBOGvhlIlboyznoRy1ZyhZOp4",
+                accessToken: "eS3ZY2tS5vtOrKjwoWr_4ED5IXeQc56m",
+                // This example is a proof of concept, for how to use the Yelp v2 API with javascript.
+                // You wouldn't actually want to expose your access token secret like this in a real application.
+                accessTokenSecret: "AdbFahgB_NhahSIUnrvF1qonOtE",
+                serviceProvider: {
+                    signatureMethod: "HMAC-SHA1"
+                }
+            };
+
+            var yelpaccessor = {
+                consumerSecret: yelpauth.consumerSecret,
+                tokenSecret: yelpauth.accessTokenSecret
+            };
+
 
             function doAuthRedirect() {
                 var pgurl = document.URL;
@@ -218,6 +242,18 @@
                         } else {
                             fsqrec = form.oldrec.value;
                         }
+                    } else {
+                        yelpparameters = [];
+                        //yelpparameters.push(['term', terms]);
+                        //yelpparameters.push(['location', near]);
+                        yelpparameters.push(['callback', 'cb']);
+                        yelpparameters.push(['oauth_consumer_key', yelpauth.consumerKey]);
+                        yelpparameters.push(['oauth_consumer_secret', yelpauth.consumerSecret]);
+                        yelpparameters.push(['oauth_token', yelpauth.accessToken]);
+                        yelpparameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+                        yelpparameters.push(['ll', '']);
+                        yelpparameters.push(['limit', '5']);
+                        yelpparameters.push(['radius_filter', '']);
                     }
                     loadWaypoints(start, end);
                     //getDirections();
@@ -394,30 +430,46 @@
                             }
                         });
                     } else {
-                        /*
-                        // Google Places API
-                        var placesurl = placesJSON + newPoint.toUrlValue() + placesJSONend; // + rad;
-                        $.getJSON(placesurl, function(data) {
-                        if(data.status == google.maps.GeocoderStatus.OK) {
-                        waypoints[cur - 1] = {
-                        location: data.results[0].name + ',' + data.results[0].vicinity,
-                        stopover: true
+                        //use yelp
+                        yelpparameters.valueOf()
+                        yelpparameters[5][1] = newPoint.toUrlValue();
+                        yelpparameters[7][1] = rad;
+                        var message = {
+                            'action': 'http://api.yelp.com/v2/search',
+                            'method': 'GET',
+                            'parameters': yelpparameters
                         };
-                        } else {
-                        console.log("Places API failed: " + data.status);
+
+                        OAuth.setTimestampAndNonce(message);
+                        OAuth.SignatureMethod.sign(message, yelpaccessor);
+
+                        var parameterMap = OAuth.getParameterMap(message.parameters);
+                        parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+                        console.log(parameterMap);
+
+                        $.ajax({
+                            url: message.action,
+                            data: parameterMap,
+                            cache: true,
+                            dataType: 'jsonp',
+                            'jsonpCallback': 'cb',
+                            success: function (yelpdata) {
+                                console.log(yelpdata);
+                                storeYelpWaypoint(yelpdata, cur);
+                                nextWaypoint(nextWP, cur + 1);
+                            },
+                            error: function (yelpdata) {
+                                errfunc(yelpdata);
+                            }
+                        });
+
+                        /*
                         waypoints[cur - 1] = {
                         location: newPoint.toUrlValue(),
                         stopover: true
                         };
-                        }
                         nextWaypoint(nextWP, cur + 1);
-                        });
                         */
-                        waypoints[cur - 1] = {
-                            location: newPoint.toUrlValue(),
-                            stopover: true
-                        };
-                        nextWaypoint(nextWP, cur + 1);
                     }
                 }
             }
@@ -478,6 +530,28 @@
                 loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['city'];
                 loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['state'];
                 loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['cc'];
+
+                waynames[cur - 1] = name;
+                waypoints[cur - 1] = {
+                    location: loc,
+                    stopover: true
+                };
+            }
+
+            function storeYelpWaypoint(data, cur) {
+                var name = data['businesses'][0]['name'];
+                var pl = 0;
+
+                while (waynames.indexOf(name) != -1) {
+                    pl++;
+                    name = data['businesses'][pl]['name'];
+                }
+
+                var loc = data['businesses'][pl]['name'];
+                loc += ", " + data['businesses'][pl]['location']['address'][0];
+                loc += ", " + data['businesses'][pl]['location']['city'];
+                loc += ", " + data['businesses'][pl]['location']['state_code'];
+                loc += ", " + data['businesses'][pl]['location']['country_code'];
 
                 waynames[cur - 1] = name;
                 waypoints[cur - 1] = {
