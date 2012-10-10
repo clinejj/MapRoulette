@@ -107,6 +107,8 @@
             var isDev;
             var notifications;
             var yelpparameters;
+            var ycats;
+            var yqry;
 
             var fsqconfig = {
                 //dev
@@ -123,10 +125,10 @@
                 //
                 consumerKey: "ga7nws5hpwm2dOFhDvxWyQ",
                 consumerSecret: "uTPBOGvhlIlboyznoRy1ZyhZOp4",
-                accessToken: "eS3ZY2tS5vtOrKjwoWr_4ED5IXeQc56m",
+                accessToken: "A2E6JGryDKnqjI5Upfi7HOpzrAjl1dOq",
                 // This example is a proof of concept, for how to use the Yelp v2 API with javascript.
                 // You wouldn't actually want to expose your access token secret like this in a real application.
-                accessTokenSecret: "AdbFahgB_NhahSIUnrvF1qonOtE",
+                accessTokenSecret: "LNGWueJjPSgIRpadyH7PbBdVvNM",
                 serviceProvider: {
                     signatureMethod: "HMAC-SHA1"
                 }
@@ -182,10 +184,21 @@
                         initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                         map.setCenter(initialLocation);
                         Geostart = initialLocation.toUrlValue();
-                        if (!isDev) {
-                            document.getElementById('fsqstart').value = Geostart;
-                            document.getElementById('regstart').value = Geostart;
-                        }
+                        geocoder.geocode({ 'latLng': initialLocation }, function (results, status) {
+                            if (status == google.maps.GeocoderStatus.OK) {
+                                var lname = results[0].formatted_address;
+                                if (!isDev) {
+                                    document.getElementById('fsqstart').value = lname;
+                                    document.getElementById('regstart').value = lname;
+                                }
+                            } else {
+                                if (!isDev) {
+                                    document.getElementById('fsqstart').value = Geostart;
+                                    document.getElementById('regstart').value = Geostart;
+                                }
+                            }
+                        })
+
                         marker = new google.maps.Marker({
                             position: initialLocation,
                             map: map
@@ -254,6 +267,14 @@
                         yelpparameters.push(['ll', '']);
                         yelpparameters.push(['limit', '5']);
                         yelpparameters.push(['radius_filter', '']);
+                        ycats = form.regcategories[form.regcategories.selectedIndex].value;
+                        if (ycats != "all") {
+                            yelpparameters.push(['category_filter', ycats]);
+                        }
+                        yqry = $.trim(form.regsearch.value);
+                        if (yqry != "") {
+                            yelpparameters.push(['term', yqry]);
+                        }
                     }
                     loadWaypoints(start, end);
                     //getDirections();
@@ -261,7 +282,7 @@
             }
 
             function loadWaypoints(orig, dest) {
-                numWaypoints = Math.round(Math.random() * 100) % maxWaypoints;
+                numWaypoints = getRandomInt(1, maxWaypoints);
                 $("#progressbar").show('fast');
                 $("#progressbar").progressbar({ value: 0 });
                 //waypoints[0] = orig;
@@ -389,7 +410,7 @@
                             dataType: 'json',
                             success: function (data) {
                                 if (typeof data['response']['warning'] != "undefined") {
-                                    console.log(data['response']['warning']);
+                                    //console.log(data['response']['warning']);
                                     console.log("trying again, with bigger radius");
                                     var splitres = fsqurl.split('&radius=');
                                     newurl = splitres[0];
@@ -400,7 +421,7 @@
                                         dataType: 'json',
                                         success: function (newdata) {
                                             if (typeof newdata['response']['warning'] != "undefined") {
-                                                console.log(newdata['response']['warning']);
+                                                //console.log(newdata['response']['warning']);
                                                 if (notifications == "") {
                                                     notifications = "we couldn't as many waypoints as we wanted. try changing your search!";
                                                 }
@@ -445,7 +466,7 @@
 
                         var parameterMap = OAuth.getParameterMap(message.parameters);
                         parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
-                        console.log(parameterMap);
+                        //console.log(parameterMap);
 
                         $.ajax({
                             url: message.action,
@@ -453,10 +474,63 @@
                             cache: true,
                             dataType: 'jsonp',
                             'jsonpCallback': 'cb',
+                            statusCode: {
+                                400: function (data) {
+                                    console.log("400 code");
+                                    console.log(data);
+                                    nextWaypoint(nextWP, cur + 1);
+                                }
+                            },
                             success: function (yelpdata) {
-                                console.log(yelpdata);
-                                storeYelpWaypoint(yelpdata, cur);
-                                nextWaypoint(nextWP, cur + 1);
+                                //console.log(yelpdata);
+                                if (yelpdata['businesses'].length > 0) {
+                                    storeYelpWaypoint(yelpdata, cur);
+                                    nextWaypoint(nextWP, cur + 1);
+                                } else {
+                                    console.log("trying again, with bigger radius");
+                                    yelpparameters.valueOf()
+                                    yelpparameters[7][1] = rad * 2;
+                                    message = {
+                                        'action': 'http://api.yelp.com/v2/search',
+                                        'method': 'GET',
+                                        'parameters': yelpparameters
+                                    };
+
+                                    OAuth.setTimestampAndNonce(message);
+                                    OAuth.SignatureMethod.sign(message, yelpaccessor);
+
+                                    var parameterMap = OAuth.getParameterMap(message.parameters);
+                                    parameterMap.oauth_signature = OAuth.percentEncode(parameterMap.oauth_signature)
+                                    //console.log(parameterMap);
+
+                                    $.ajax({
+                                        url: message.action,
+                                        data: parameterMap,
+                                        cache: true,
+                                        dataType: 'jsonp',
+                                        'jsonpCallback': 'cb',
+                                        statusCode: {
+                                            400: function (data) {
+                                                console.log("400 code");
+                                                console.log(data);
+                                                nextWaypoint(nextWP, cur + 1);
+                                            }
+                                        },
+                                        success: function (yelpdata) {
+                                            if (yelpdata['businesses'].length > 0) {
+                                                storeYelpWaypoint(yelpdata, cur);
+                                            } else {
+                                                if (notifications == "") {
+                                                    notifications = "we couldn't as many waypoints as we wanted. try changing your search!";
+                                                }
+                                            }
+                                            nextWaypoint(nextWP, cur + 1);
+                                        },
+                                        error: function (yelpdata) {
+                                            errfunc(yelpdata);
+                                        }
+                                    })
+                                }
                             },
                             error: function (yelpdata) {
                                 errfunc(yelpdata);
@@ -497,11 +571,12 @@
                 }
                 directionsService.route(dirrequest, function (dirresult, dirstatus) {
                     if (dirstatus == google.maps.DirectionsStatus.OK) {
-                        if (isFSQ) {
-                            directionsDisplay.setDirections(modAddresses(dirresult));
+                        //if (isFSQ) {
+                        directionsDisplay.setDirections(modAddresses(dirresult));
+                        /*
                         } else {
-                            directionsDisplay.setDirections(dirresult);
-                        }
+                        directionsDisplay.setDirections(dirresult);
+                        }*/
                         if (notifications != "") {
                             $("#notifications").show('fast');
                             $("#notifications").html(notifications);
@@ -517,12 +592,23 @@
             }
 
             function storeFsqWaypoint(data, cur) {
-                var name = data['response']['groups'][0]['items'][0]['venue']['name'];
-                var pl = 0;
+                var pl;
+                if (data['response']['groups'][0]['items'].length == 1) {
+                    pl = 0;
+                } else {
+                    pl = getRandomInt(0, (data['response']['groups'][0]['items'].length-1));
+                }
+                var name = data['response']['groups'][0]['items'][pl]['venue']['name'];
 
-                while (waynames.indexOf(name) != -1) {
-                    pl++;
-                    name = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                if (waynames.indexOf(name) != -1) {
+                    while ((waynames.indexOf(name) != -1)) {
+                        pl++;
+                        if (pl >= data['response']['groups'][0]['items'].length) {
+                            return;
+                        } else {
+                            name = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                        }
+                    }
                 }
 
                 var loc = data['response']['groups'][0]['items'][pl]['venue']['name'];
@@ -531,20 +617,28 @@
                 loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['state'];
                 loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['cc'];
 
-                waynames[cur - 1] = name;
-                waypoints[cur - 1] = {
-                    location: loc,
-                    stopover: true
-                };
+                waynames.push(name);
+                waypoints.push({ location: loc, stopover: true });
             }
 
             function storeYelpWaypoint(data, cur) {
-                var name = data['businesses'][0]['name'];
-                var pl = 0;
+                var pl;
+                if (data['businesses'].length == 1) {
+                    pl = 0;
+                } else {
+                    pl = getRandomInt(0, (data['businesses'].length-1));
+                }
+                var name = data['businesses'][pl]['name'];
 
-                while (waynames.indexOf(name) != -1) {
-                    pl++;
-                    name = data['businesses'][pl]['name'];
+                if (waynames.indexOf(name) != -1) {
+                    while ((waynames.indexOf(name) != -1)) {
+                        pl++;
+                        if (pl >= data['businesses'].length) {
+                            return;
+                        } else {
+                            name = data['businesses'][pl]['name'];
+                        }
+                    }
                 }
 
                 var loc = data['businesses'][pl]['name'];
@@ -553,11 +647,8 @@
                 loc += ", " + data['businesses'][pl]['location']['state_code'];
                 loc += ", " + data['businesses'][pl]['location']['country_code'];
 
-                waynames[cur - 1] = name;
-                waypoints[cur - 1] = {
-                    location: loc,
-                    stopover: true
-                };
+                waynames.push(name);
+                waypoints.push({ location: loc, stopover: true });
             }
 
             function modAddresses(dirresult) {
@@ -596,6 +687,10 @@
                 document.getElementById("gobtn").disabled = false;
             }
 
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
             google.maps.event.addDomListener(window, 'load', initialize);
     	</script>
         <script type="text/javascript">
@@ -617,6 +712,34 @@
                 <form id="regroute" name="route" onSubmit='JavaScript:return false;'>
                     start: <input id="regstart" type="text" name="start" size="40" />
                     end: <input id="regend" type="text" name="end" size="40" />
+                    <br>
+                    category: 
+                    <select name="regcategories" id="sections">
+                      <option value="all" selected>all</option>
+                      <option value="active">active</option>
+                      <option value="arts">arts</option>
+                      <option value="auto">auto</option>
+                      <option value="beautysvc">beauty</option>
+                      <option value="education">education</option>
+                      <option value="eventservices">events</option>
+                      <option value="financialservices">financial</option>
+                      <option value="food">food</option>
+                      <option value="health">health</option>
+                      <option value="homeservices">home</option>
+                      <option value="hotelstravel">hotels/travel</option>
+                      <option value="localflavor">local flavor</option>
+                      <option value="localservices">local services</option>
+                      <option value="massmedia">mass media</option>
+                      <option value="nightlife">nightlife</option>
+                      <option value="pets">pets</option>
+                      <option value="professional">professional</option>
+                      <option value="publicservicesgovt">public svc</option>
+                      <option value="realestate">real estate</option>
+                      <option value="religiousorgs">religious</option>
+                      <option value="restaurants">restaurants</option>
+                      <option value="shopping">shopping</option>
+                    </select>
+                    search: <input id="regsearch" type="text" name="term" size="40" />
                     <select name="transport" id="transport">
                       <option value="driving" selected>driving</option>
                       <option value="transit">transit</option>
@@ -656,7 +779,7 @@
             <div id="progressbar"></div>
             <div id="notifications"></div>
             <div id="foursquare" class="foursquare">
-            	log in to <a href="javascript:doAuthRedirect()">foursquare</a> to get customized waypoints
+            	places powered by <a href="http://www.yelp.com">yelp</a>. log in to <a href="javascript:doAuthRedirect()">foursquare</a> to get customized waypoints
             </div>
         </div>
         <div id="directions-panel"></div>
