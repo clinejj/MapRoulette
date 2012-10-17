@@ -195,8 +195,10 @@
                 });
                 */
                 if (!isAuth) {
-                    $("#newbox").css("display", "none");
-                    $("#oldbox").css("display", "none");
+                    $("#newrec").css("display", "none");
+                    $("#newreclbl").css("display", "none");
+                    $("#oldrec").css("display", "none");
+                    $("#oldreclbl").css("display", "none");
                 }
 
                 $("#notifications").hide('fast');
@@ -566,8 +568,10 @@
                       <option value="outdoors">outdoors</option>
                     </select>
                     search: <input id="search" type="text" name="search" size="40" />
-                    <div id="newbox"><input type="checkbox" name="new" id="newrec" value="new" checked> new</div>
-                    <div id="oldbox"><input type="checkbox" name="old" id="oldrec" value="old" checked> old</div>
+                    <input type="checkbox" name="new" id="newrec" value="new" checked/>
+                    <label id="newreclbl" for="newrec">new</label>
+                    <input type="checkbox" name="old" id="oldrec" value="old" checked/> 
+                    <label id="oldreclbl" for="oldrec">old</label>
                     <select name="transport" id="transport">
                       <option value="driving" selected>driving</option>
                       <option value="transit">transit</option>
