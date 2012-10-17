@@ -438,6 +438,7 @@
                     dirrequest['travelMode'] = google.maps.TravelMode.WALKING;
                 }
                 directionsService.route(dirrequest, function (dirresult, dirstatus) {
+                    //console.log(waypoints);
                     if (dirstatus == google.maps.DirectionsStatus.OK) {
                         //if (isFSQ) {
                         directionsDisplay.setDirections(modAddresses(dirresult));
@@ -467,11 +468,14 @@
                     pl = getRandomInt(0, (data['response']['groups'][0]['items'].length - 1));
                 }
                 var name = data['response']['groups'][0]['items'][pl]['venue']['name'];
+                var origpl = pl;
 
                 if (waynames.indexOf(name) != -1) {
                     while ((waynames.indexOf(name) != -1)) {
                         pl++;
                         if (pl >= data['response']['groups'][0]['items'].length) {
+                            pl = -1;
+                        } else if (pl == origpl) {
                             return;
                         } else {
                             name = data['response']['groups'][0]['items'][pl]['venue']['name'];
