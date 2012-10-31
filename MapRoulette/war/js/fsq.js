@@ -471,7 +471,7 @@ function getRandomInt(min, max) {
 function addMobileStyle() {
     var currTabElem = document.getElementById("map_canvas");
 
-    currTabElem.setAttribute("style", "width: "+screen.width*.95+"px;height: "+screen.height*0.65+"px;");
+    currTabElem.setAttribute("style", "width: "+window.innerWidth+"px;height: "+window.innerHeight*.65+"px;");
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
