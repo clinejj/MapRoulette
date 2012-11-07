@@ -20,7 +20,7 @@
       
       .styleform {
         width: auto;
-        margin: 0px auto;
+        margin-left: 10px;
       }
       
       .foursquare {
@@ -68,7 +68,7 @@
     </head>
     <body>
         <div id="control">
-            <h2 style="text-align: center"><a href="about.html">maproulette</a></h2>
+            <h2 style="text-align: center"><a href="about-m.html">maproulette</a></h2>
             <div id="fsqform" class="styleform">
                 <form id="fsqroute" name="route" onSubmit='JavaScript:return false;' class="form-horizontal">
                     <div class="control-group">                   
@@ -98,12 +98,14 @@
                       </div>
                     </div>
                     <div id="recbuttons" class="control-group">
-                      <label class="checkbox">
-                        <input type="checkbox" name="new" id="newrec" value="new" checked> new
-                      </label>
-                      <label class="checkbox">
-                        <input type="checkbox" name="old" id="oldrec" value="old" checked> old
-                      </label>
+                      <div id="controls">
+                        <label class="checkbox">
+                          <input type="checkbox" name="new" id="newrec" value="new" checked> new
+                        </label>
+                        <label class="checkbox">
+                          <input type="checkbox" name="old" id="oldrec" value="old" checked> old
+                        </label>
+                      </div>
                     </div>
                     <div class="control-group">
                       <label id="schlbl" for="search" class="control-label">search:</label>
@@ -125,12 +127,13 @@
                        <div class="controls">
                           <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)" class="btn btn-primary"/>
                       </div>
+                    </div>
                 </form>
             </div>
             <div id="progressbar" class="progress progress-striped active"></div>
             <div id="notifications"></div>
             <div id="foursquare" class="foursquare">
-            places powered by <a href="http://www.foursquare.com">foursquare</a>. <a href="javascript:doAuthRedirect()">log in</a> to get customized waypoints. <a href="yelp.html">(use yelp)</a>
+            places powered by <a href="http://www.foursquare.com">foursquare</a>. <a href="javascript:doAuthRedirect()">log in</a> to get customized waypoints.
             </div>
         </div>
         <div id="tabmenu">

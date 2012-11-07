@@ -67,6 +67,17 @@ function initialize() {
     if (pgurl.indexOf("localhost") != -1) {
         isDev = true;
     }
+    if ((jQuery.browser.mobile)) {
+      var newurl = "http://maproulette.appspot.com";
+      if (isDev) {
+        newurl = "http://localhost:8888";
+      }
+      if (pgurl.indexOf('access_token') != -1) {
+        window.location.replace(newurl + "/mobile.html" + pgurl.substring(pgurl.indexOf('#')));
+      } else {
+        window.location.replace(newurl + "/mobile.html");
+      }
+    }
     if (pgurl.indexOf("mobile") != -1) {
         $('#tabs a:first').tab('show');
         addMobileStyle();
