@@ -1,50 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>maproulette</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device=width, initial-scale=1.0">
-        <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" rel="stylesheet" /> 
-        <link type="text/css" href="css/bootstrap.min.css" rel="stylesheet"/>
-        <link type="text/css" href="css/bootstrap-responsive.min.css" rel="stylesheet">
-        <style type="text/css">
+  <head>
+    <title>maproulette</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device=width, initial-scale=1.0">
+    <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" rel="stylesheet" /> 
+    <link type="text/css" href="css/bootstrap.min.css" rel="stylesheet"/>
+    <link type="text/css" href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <style type="text/css">
 			html, body {
 			  height: 100%;
 			  margin: 0;
 			  padding: 0;
 			}
-            
-            label {
-                 display:  inline;
-                 padding:  3px;
-                 width: 10%;
-                 text-align: right;
-                float: left;
-             }
-			
-            button, input, select, textarea {
-                 vertical-align: inherit;
-             }
+          
+      .form-horizontal .control-group {
+          margin-bottom: 10px;
+      }
+      
+      .styleform {
+        width: auto;
+        margin: 0px auto;
+      }
+      
+      .foursquare {
+        width: auto;
+        text-align: center;
+      }
 
-            input, select {
-                width: 75%;
-            }
-            
 			#map_canvas {
 			  height: 80%;
 			}
             
-            #map_canvas img {
-                max-width: none;
-            }
+      #map_canvas img {
+          max-width: none;
+      }
 			
 			#progressbar {
-                display:block;
-                margin:0 auto;
+        display:block;
+        margin:0 auto;
 				height: 15px;
 				width: 200px;
 				overflow: hidden;
-                text-align: center;
+        text-align: center;
 			}
 			
 			#directions-panel {
@@ -52,23 +50,11 @@
 				overflow: auto;
 			}
 			
-			#control {
-				background: #fff;
-				padding: 5px;
-				font-size: 14px;
-				font-family: Arial;
-				border: 1px solid #ccc;
-				box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
-				display: none;
-                text-align: center;
-			}
-
-            #gobtn {
-                
-                width: 100px;
-            }
+      #gobtn {
+          width: 100px;
+      }
 		</style>
-        <script type="text/javascript">
+    <script type="text/javascript">
 		var _gaq = _gaq || [];
 		_gaq.push(['_setAccount', 'UA-9519585-6']);
 		_gaq.push(['_trackPageview']);
@@ -81,45 +67,70 @@
 		</script>
     </head>
     <body>
-        <div id="control" style="text-align: center">
-            <h2><a href="about.html">maproulette</a></h2>
+        <div id="control">
+            <h2 style="text-align: center"><a href="about.html">maproulette</a></h2>
             <div id="fsqform" class="styleform">
-                <form id="fsqroute" name="route" onSubmit='JavaScript:return false;'>                   
-                    <label id="startlbl" for="fsqstart">start:</label><input id="fsqstart" type="text" name="start" size="40"/>
-                    <br>
-                    <label id="endlbl" for="fsqend">end:</label><input id="fsqend" type="text" name="end" size="40"/>
-                    <br>
-                    <label id="catlbl" for="sections">category:</label> 
-                    <select name="categories" id="sections">
-                      <option value="all" selected>all</option>
-                      <option value="food">food</option>
-                      <option value="drinks">drinks</option>
-                      <option value="coffee">coffee</option>
-                      <option value="shops">shops</option>
-                      <option value="arts">arts</option>
-                      <option value="outdoors">outdoors</option>
-                    </select>
-                    <br>
-                    <label id="schlbl" for="search">search:</label><input id="search" type="text" name="search" size="40" />
-                    <input type="checkbox" name="new" id="newrec" value="new" checked/>
-                    <label id="newreclbl" for="newrec">new</label>
-                    <input type="checkbox" name="old" id="oldrec" value="old" checked/> 
-                    <label id="oldreclbl" for="oldrec">old</label>
-                    <br>
-                    <select name="transport" id="transport">
-                      <option value="driving" selected>driving</option>
-                      <option value="transit">transit</option>
-                      <option value="biking">biking</option>
-                      <option value="walking">walking</option>
-                    </select>
-                    <br>
-                    <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)" class="btn btn-primary"/>
+                <form id="fsqroute" name="route" onSubmit='JavaScript:return false;' class="form-horizontal">
+                    <div class="control-group">                   
+                      <label id="startlbl" for="fsqstart" class="control-label">start:</label>
+                      <div class="controls">
+                        <input id="fsqstart" type="text" name="start" size="40"/>
+                      </div>
+                    </div>
+                    <div class="control-group"> 
+                      <label id="endlbl" for="fsqend" class="control-label">end:</label>
+                      <div class="controls">
+                        <input id="fsqend" type="text" name="end" size="40"/>
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label id="catlbl" for="sections" class="control-label">category:</label> 
+                      <div class="controls">
+                        <select name="categories" id="sections">
+                          <option value="all" selected>all</option>
+                          <option value="food">food</option>
+                          <option value="drinks">drinks</option>
+                          <option value="coffee">coffee</option>
+                          <option value="shops">shops</option>
+                          <option value="arts">arts</option>
+                          <option value="outdoors">outdoors</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div id="recbuttons" class="control-group">
+                      <label class="checkbox">
+                        <input type="checkbox" name="new" id="newrec" value="new" checked> new
+                      </label>
+                      <label class="checkbox">
+                        <input type="checkbox" name="old" id="oldrec" value="old" checked> old
+                      </label>
+                    </div>
+                    <div class="control-group">
+                      <label id="schlbl" for="search" class="control-label">search:</label>
+                      <div class="controls">
+                        <input id="search" type="text" name="search" size="40" />
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <div class="controls">
+                        <select name="transport" id="transport">
+                          <option value="driving" selected>driving</option>
+                          <option value="transit">transit</option>
+                          <option value="biking">biking</option>
+                          <option value="walking">walking</option>
+                        </select>
+                        </div>
+                      </div>
+                    <div class="control-group">
+                       <div class="controls">
+                          <input id="gobtn" type="submit" name="go" value="go" onClick="getRoute(this.form)" class="btn btn-primary"/>
+                      </div>
                 </form>
             </div>
             <div id="progressbar" class="progress progress-striped active"></div>
             <div id="notifications"></div>
             <div id="foursquare" class="foursquare">
-            	places powered by <a href="http://www.foursquare.com">foursquare</a>. <a href="javascript:doAuthRedirect()">log in</a> to get customized waypoints. <a href="yelp.html">(use yelp)</a>
+            places powered by <a href="http://www.foursquare.com">foursquare</a>. <a href="javascript:doAuthRedirect()">log in</a> to get customized waypoints. <a href="yelp.html">(use yelp)</a>
             </div>
         </div>
         <div id="tabmenu">

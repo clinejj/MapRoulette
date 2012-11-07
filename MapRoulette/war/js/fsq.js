@@ -129,6 +129,7 @@ function initialize() {
         $("#newreclbl").css("display", "none");
         $("#oldrec").css("display", "none");
         $("#oldreclbl").css("display", "none");
+        $("#recbuttons").css("display", "none");
     }
 
     $("#notifications").hide('fast');
