@@ -61,7 +61,7 @@ function initialize() {
     if (pgurl.indexOf('access_token') != -1) {
         var splitres = pgurl.split('access_token=');
         fsq_token = splitres[1];
-        $('div.foursquare').html('logged into <a href="http://www.foursquare.com/">foursquare</a>.');
+        $('div.foursquare').html('<a href="http://www.foursquare.com/"><img src="img/poweredbyfsq.png" width=200 height=50 alt="powered by foursquare"></a>');
         isAuth = true;
     }
     if (pgurl.indexOf("localhost") != -1) {

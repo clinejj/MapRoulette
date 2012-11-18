@@ -1,0 +1,45 @@
+html, body {
+			  height: 100%;
+			  margin: 0;
+			  padding: 0;
+			}
+          
+      .form-horizontal .control-group {
+          margin-bottom: 10px;
+      }
+      
+      .styleform {
+        width: auto;
+        margin-left: 10px;
+      }
+      
+      .foursquare {
+        width: auto;
+        text-align: center;
+      }
+
+			#map_canvas {
+			  height: 80%;
+			}
+            
+      #map_canvas img {
+          max-width: none;
+      }
+			
+			#progressbar {
+        display:block;
+        margin:0 auto;
+				height: 15px;
+				width: 200px;
+				overflow: hidden;
+        text-align: center;
+			}
+			
+			#directions-panel {
+				height: 80%;
+				overflow: auto;
+			}
+			
+      #gobtn {
+          width: 100px;
+      }
