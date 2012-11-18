@@ -1,0 +1,53 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+             
+label {
+  display: inline;
+  padding:  3px;
+}
+             
+button, input, select, textarea {
+  vertical-align: inherit;
+}
+
+form {
+  margin: 0px;
+}
+			
+#map_canvas {
+	height: 80%;
+}
+			
+#progressbar {
+  display:block;
+  margin:0 auto;
+	height: 15px;
+	width: 200px;
+	overflow: hidden;
+  text-align: center;
+}
+			
+#directions-panel {
+	height: 80%;
+	float: right;
+	width: 390px;
+	overflow: auto;
+}
+			
+#map-canvas {
+	margin-right: 400px;
+}
+			
+#control {
+	background: #fff;
+	padding: 5px;
+	font-size: 14px;
+	font-family: Arial;
+	border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+	display: none;
+  text-align: center;
+}
