@@ -29,7 +29,7 @@ var fsq_token;
 var isDev;
 var isAuth;
 var notifications;
-var version = "&v=20121017";
+var version = "&v=20121121";
 
 var fsqconfig = {
     //dev

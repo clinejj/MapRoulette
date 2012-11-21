@@ -9,7 +9,7 @@ label {
   padding:  3px;
 }
              
-button, input, select, textarea {
+button {
   vertical-align: inherit;
 }
 
