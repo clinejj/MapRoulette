@@ -30,11 +30,11 @@
         <div id="control" style="text-align: center">
             <h2><a href="about.html">maproulette</a></h2>
             <div id="fsqform">
-                <form id="fsqroute" name="route" onSubmit='JavaScript:return false;'>
-                    start: <input id="fsqstart" type="text" name="start" size="40" />
-                    end: <input id="fsqend" type="text" name="end" size="40" />
+                <form id="fsqroute" name="route" onSubmit='JavaScript:return false;' class="form-inline">
+                    <label>start: </label><input id="fsqstart" type="text" name="start" size="40" />
+                    <label>end: </label><input id="fsqend" type="text" name="end" size="40" />
                     <br>
-                    category: 
+                    <label>category: </label>
                     <select name="categories" id="sections">
                       <option value="all" selected>all</option>
                       <option value="food">food</option>
@@ -44,7 +44,7 @@
                       <option value="arts">arts</option>
                       <option value="outdoors">outdoors</option>
                     </select>
-                    search: <input id="search" type="text" name="search" size="40" />
+                    <label>search: </label><input id="search" type="text" name="search" size="40" />
                     <input type="checkbox" name="new" id="newrec" value="new" checked/>
                     <label id="newreclbl" for="newrec">new</label>
                     <input type="checkbox" name="old" id="oldrec" value="old" checked/> 
