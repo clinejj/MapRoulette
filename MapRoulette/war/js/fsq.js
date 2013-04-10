@@ -429,11 +429,16 @@ function storeFsqWaypoint(data, cur) {
         }
     }
 
+    /*
     var loc = data['response']['groups'][0]['items'][pl]['venue']['name'];
     loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['address'];
     loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['city'];
     loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['state'];
     loc += ", " + data['response']['groups'][0]['items'][pl]['venue']['location']['cc'];
+    */
+    var loc = data['response']['groups'][0]['items'][pl]['venue']['location']['lat'];
+    loc += ", "
+    loc += data['response']['groups'][0]['items'][pl]['venue']['location']['lng']
 
     waynames.push(name);
     waypoints.push({ location: loc, stopover: true });
@@ -447,17 +452,31 @@ function modAddresses(dirresult) {
         if (waypoints[i] != undefined) {
             if (i == 0) {
                 modResult.routes[0].legs[i].start_address = start;
-                modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                //modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                modResult.routes[0].legs[i].end_address = getWaypointDisplay(i);
             } else if (i == (dirresult.routes[0].legs.length - 1)) {
-                modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
+                modResult.routes[0].legs[i].end_address = getWaypointDisplay(i - 1);
+                //modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
                 modResult.routes[0].legs[i].end_address = end;
             } else {
-                modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
-                modResult.routes[0].legs[i].end_address = waypoints[i].location;
+                modResult.routes[0].legs[i].end_address = getWaypointDisplay(i - 1);
+                //modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
+                modResult.routes[0].legs[i].end_address = getWaypointDisplay(i);
+                //modResult.routes[0].legs[i].end_address = waypoints[i].location;
             }
         }
     }
     return modResult;
+}
+
+function getWaypointDisplay(index) {
+    var dispName = waypointsFull[index]['venue']['name'];
+    dispName += ", " + waypointsFull[index]['venue']['location']['address'];
+    dispName += ", " + waypointsFull[index]['venue']['location']['city'];
+    dispName += ", " + waypointsFull[index]['venue']['location']['state'];
+    dispName += ", " + waypointsFull[index]['venue']['location']['cc'];
+
+    return dispName;
 }
 
 function placeMarker(location) {
