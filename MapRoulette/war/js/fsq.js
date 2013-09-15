@@ -1,5 +1,5 @@
 var map;
-var initialLocation = new google.maps.LatLng(41.2, -112);
+var initialLocation = new google.maps.LatLng(39.3722, -104.856);
 var Geostart = "";
 var directionsDisplay;
 var directionsService = new google.maps.DirectionsService();
