@@ -4,5 +4,32 @@
 	<classpathentry kind="src" output="test-classes" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1.jar" sourcepath="C:/Users/John/Documents/Filez/dev/libraries/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/John/Documents/Filez/dev/libraries/commons-lang3-3.1-bin/commons-lang3-3.1/commons-lang3-3.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/httpcomponents-client-4.3-bin/lib/httpclient-4.3.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/John/Documents/Filez/dev/libraries/httpcomponents-client-4.3-bin/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/httpcomponents-client-4.3-bin/lib/httpcore-4.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/google-gson-2.2.4/gson-2.2.4.jar" sourcepath="C:/Users/John/Documents/Filez/dev/libraries/google-gson-2.2.4/gson-2.2.4-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/John/Documents/Filez/dev/libraries/google-gson-2.2.4/gson-2.2.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/geocoder-java-0.15/geocoder-java-0.15.jar" sourcepath="C:/Users/John/Documents/Filez/dev/libraries/geocoder-java-0.15/geocoder-java-0.15-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/John/Documents/Filez/dev/libraries/geocoder-java-0.15/geocoder-java-0.15-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/guava-15.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/John/Documents/Filez/dev/libraries/foursquare-api-1.0.2/foursquare-api-1.0.2.jar" sourcepath="C:/Users/John/Documents/Filez/dev/libraries/foursquare-api-1.0.2/foursquare-api-1.0.2-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/John/Documents/Filez/dev/libraries/foursquare-api-1.0.2/foursquare-api-1.0.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
