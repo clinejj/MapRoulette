@@ -148,16 +148,12 @@ function initialize() {
 }
 
 $("#fsqroute").submit(function (event) {
-
-    /* stop form from submitting normally */
     event.preventDefault();
     start = $.trim(this.start.value);
     end = $.trim(this.end.value);
 
-    /* Send the data using post */
     var posting = $.post('/ajax/roulette', $(this).serialize());
 
-    /* Put the results in a div */
     posting.done(function (data) {
         response = JSON.parse(data);
         waynames = response.waypointNames;
