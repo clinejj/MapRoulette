@@ -13,6 +13,7 @@ var fsq_token;
 var isDev;
 var isAuth;
 var notifications;
+var l;
 
 var fsqconfig = {
     //dev
@@ -64,7 +65,8 @@ function initialize() {
     if (pgurl.indexOf("localhost") != -1) {
         isDev = true;
     }
-    if ((jQuery.browser.mobile)) {
+    
+    if (window.mobilecheck()) {
       var newurl = "http://maproulette.appspot.com";
       if (isDev) {
         newurl = "http://localhost:8888";
@@ -75,10 +77,12 @@ function initialize() {
         window.location.replace(newurl + "/mobile.html");
       }
     }
+    
     if (pgurl.indexOf("mobile") != -1) {
         $('#tabs a:first').tab('show');
         addMobileStyle();
     }
+    //l = Ladda.create($('#gobtn')[0]); //Ladda.bind( 'input[type=submit]' );//
     directionsDisplay = new google.maps.DirectionsRenderer();
     var mapOptions = {
         zoom: 12,
@@ -145,6 +149,7 @@ function initialize() {
 $("#fsqroute").submit(function (event) {
     event.preventDefault();
     document.getElementById("gobtn").disabled = true;
+    l.start();
     $("#notifications").hide('fast');
     notifications = "";
     start = $.trim(this.start.value);
@@ -152,6 +157,7 @@ $("#fsqroute").submit(function (event) {
     if ((start == "") || (end == "")) {
         $("#notifications").show('fast');
         $("#notifications").html("whoops! please enter both start and end points!");
+        l.stop();
         document.getElementById("gobtn").disabled = false;
     } else {
         transMethod = this.transport.value;
@@ -204,6 +210,7 @@ function getDirections() {
         }
     });
     $("#progressbar").hide('fast');
+    l.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
@@ -249,6 +256,7 @@ function errfunc(data) {
     $("#progressbar").hide('fast');
     $("#notifications").show('fast');
     $("#notifications").html("whoops! we ran into an error. try again!");
+    l.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
