@@ -150,7 +150,7 @@ $("#fsqroute").submit(function (event) {
             if (response.isOK) {
                 waynames = response.data.waypointNames;
                 waypoints = response.data.waypoints;
-                waypointsFull = rsponse.data.fullWaypoints;
+                waypointsFull = response.data.fullWaypoints;
                 getDirections();
             } else {
                 errfunc(response.errors);
@@ -158,32 +158,6 @@ $("#fsqroute").submit(function (event) {
         });
     }
 });
-
-function getRoute(form) {
-    document.getElementById("gobtn").disabled = true;
-    $("#notifications").hide('fast');
-    start = $.trim(form.start.value);
-    end = $.trim(form.end.value);
-    if ((start == "") || (end == "")) {
-        $("#notifications").show('fast');
-        $("#notifications").html("whoops! please enter both start and end points!");
-        document.getElementById("gobtn").disabled = false;
-    } else {
-        transMethod = form.transport.value;
-
-        $.post('http://maproulette.appsot.com/ajax/roulette', $(form).serialize(), function (data) {
-            response = JSON.parse(data);
-            if (response.isOK) {
-                waynames = response.data.waypointNames;
-                waypoints = response.data.waypoints;
-                waypointsFull = rsponse.data.fullWaypoints;
-                getDirections();
-            } else {
-                errfunc(response.errors);
-            }
-        });
-    }
-}
 
 function getDirections() {
     var dirrequest = {
