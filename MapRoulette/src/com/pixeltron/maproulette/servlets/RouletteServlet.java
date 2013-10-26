@@ -69,7 +69,8 @@ public class RouletteServlet extends HttpServlet {
 		String search = req.getParameter("search");
 		String checkNew = req.getParameter("new");
 		String checkOld = req.getParameter("old");
-		String  transport = req.getParameter("transport");
+		String transport = req.getParameter("transport");
+		String oauth_token = req.getParameter("oauth_token");
 		String responseBody = "";
 		
 		Gson gson = new Gson();
@@ -154,6 +155,21 @@ public class RouletteServlet extends HttpServlet {
                 	}
                 	urlBuilder.append("&radius=");
                 	urlBuilder.append(rad);
+                	if (StringUtils.isNotBlank(oauth_token)) {
+                		urlBuilder.append("&oauth_token=");
+                		urlBuilder.append(URLEncoder.encode(oauth_token, "UTF-8"));
+                		urlBuilder.append("&novelty=");
+                		if (StringUtils.isNotBlank(checkNew)) {
+                			if (StringUtils.isNotBlank(checkOld)) {
+                    			urlBuilder.append("both");
+                    		} else {
+                    			urlBuilder.append(checkNew);
+                    		}
+                		} else {
+                			urlBuilder.append(checkOld);
+                		}
+                		
+                	}
                 	URL reqUrl = new URL(urlBuilder.toString());
                 	HTTPRequest fsqreq = new HTTPRequest(reqUrl);
                 	try {

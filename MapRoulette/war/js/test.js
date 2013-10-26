@@ -62,6 +62,7 @@ function initialize() {
         var splitres = pgurl.split('access_token=');
         fsq_token = splitres[1];
         $('div.foursquare').html('<a href="http://www.foursquare.com/"><img src="img/poweredbyfsq.png" width=200 height=50 alt="powered by foursquare"></a>');
+        $('#oauth_token').val(fsq_token);
         isAuth = true;
     }
     if (pgurl.indexOf("localhost") != -1) {
