@@ -2,15 +2,26 @@ package com.pixeltron.maproulette.servlets;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.google.appengine.api.urlfetch.HTTPRequest;
+import com.google.appengine.api.urlfetch.HTTPResponse;
+import com.google.appengine.api.urlfetch.URLFetchService;
+import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.code.geocoder.Geocoder;
 import com.google.code.geocoder.GeocoderRequestBuilder;
 import com.google.code.geocoder.model.GeocodeResponse;
@@ -20,15 +31,22 @@ import com.google.code.geocoder.model.LatLng;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
 import com.pixeltron.maproulette.responses.WaypointResponse;
 
 import fi.foyt.foursquare.api.FoursquareApi;
 import fi.foyt.foursquare.api.FoursquareApiException;
+import fi.foyt.foursquare.api.JSONFieldParser;
 import fi.foyt.foursquare.api.Result;
+import fi.foyt.foursquare.api.ResultMeta;
 import fi.foyt.foursquare.api.entities.CompactVenue;
+import fi.foyt.foursquare.api.entities.KeywordGroup;
 import fi.foyt.foursquare.api.entities.Recommendation;
 import fi.foyt.foursquare.api.entities.RecommendationGroup;
 import fi.foyt.foursquare.api.entities.Recommended;
+import fi.foyt.foursquare.api.entities.Warning;
+import fi.foyt.foursquare.api.io.Response;
 
 @SuppressWarnings("serial")
 public class RouletteServlet extends HttpServlet {
@@ -43,7 +61,7 @@ public class RouletteServlet extends HttpServlet {
 	private static int CONV_MI_M = 1760;             		// rough miles to meters
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
-	throws IOException {		
+			throws IOException {		
 		String strResp = "";
 		String start = req.getParameter("start");
 		String end = req.getParameter("end");
@@ -119,35 +137,51 @@ public class RouletteServlet extends HttpServlet {
                 
                 List<RecommendationGroup> foursquareResults = Lists.newArrayList();
                 List<CompactVenue> venueResults = Lists.newArrayList();
-                FoursquareApi foursquareApi = new FoursquareApi(FOURSQUARE_API_KEY_DEV, FOURSQUARE_API_SECRET_DEV, "http://maproulette.appspot.com/");
+                
+                List<HTTPResponse> responses = Lists.newArrayList();
                 for (LatLng waypoint : waypoints) {
-                	try {
-	                	Result<Recommended> result = foursquareApi.venuesExplore(waypoint.toUrlValue(), null, null, null, rad, categories, search, 5, null);
-	            	    boolean success = false;
-	            	    
-	            	    if (result.getMeta().getCode() == 200) {
-	            	    	if (result.getResult().getWarning() == null) {
-	            	    		success = true;
-	            	    	} else {
-	            	    		result = foursquareApi.venuesExplore(waypoint.toUrlValue(), null, null, null, rad * 2, categories, search, 5, null);
-	            	    		if (result.getMeta().getCode() == 200) {
-	            	    			if (result.getResult().getWarning() == null) {
-	            	    				success = true;
-	            	    			}			
-	            	    		}
-	            	    	}
-	            	    }
-	            	    
-	            	    if (success) {
-	            		    RecommendationGroup[] group = result.getResult().getGroups();
-	            		    if (group.length > 0) {
-	            		    	if (group[0].getItems().length > 0)
-	            		    		foursquareResults.add(group[0]);
-	            		    }
-	            	    }
-                	} catch (FoursquareApiException e) {
-                		e.printStackTrace();
+                	URLFetchService fetch = URLFetchServiceFactory.getURLFetchService();
+                	StringBuilder urlBuilder = new StringBuilder("https://api.foursquare.com/v2/venues/explore?ll=");
+                	urlBuilder.append(waypoint.toUrlValue());
+                	urlBuilder.append("&limit=6&client_id=GWCCYYFINDKJ1A3JUY0KMUAEXX5UQ0EGHTQPPGUGLTVAKNUK&client_secret=JYUTNCPVW4K0JLGFYS3ROLHHDEFPZOJSPP2R0RJHZBTOCQJO&v=20131013");
+                	if (StringUtils.isNotBlank(categories)) {
+                		urlBuilder.append("&section=");
+                		urlBuilder.append(categories);
                 	}
+                	if (StringUtils.isNotBlank(search)) {
+                		urlBuilder.append("&query=");
+                		urlBuilder.append(URLEncoder.encode(search, "UTF-8"));
+                	}
+                	urlBuilder.append("&radius=");
+                	urlBuilder.append(rad);
+                	URL reqUrl = new URL(urlBuilder.toString());
+                	HTTPRequest fsqreq = new HTTPRequest(reqUrl);
+                	try {
+						responses.add(fetch.fetchAsync(fsqreq).get());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						e.printStackTrace();
+					}
+                }
+                
+                for (HTTPResponse fsqresp : responses) {
+                	FoursquareApiRequestResponse response = handleApiResponse(
+		                			new Response(new String(fsqresp.getContent(), "UTF-8"), 
+		                			fsqresp.getResponseCode(), 
+		                			null));
+             	
+                    if (response.getMeta().getCode() == 200) {
+                    	try {
+							RecommendationGroup[] groups = (RecommendationGroup[]) JSONFieldParser.parseEntities(RecommendationGroup.class, response.getResponse().getJSONArray("groups"), true);
+							if (groups.length > 0) {
+								if (groups[0].getItems().length > 0)
+									foursquareResults.add(groups[0]);
+							}
+                    	} catch (Exception e) {
+                    		e.printStackTrace();
+                    	}
+                    }
                 }
                 
                 for (RecommendationGroup result : foursquareResults) {
@@ -174,4 +208,27 @@ public class RouletteServlet extends HttpServlet {
 		}
 		resp.getOutputStream().println(responseBody);
 	}
+
+	/**
+	 * Handles normal API request response
+	 * 
+	 * @param response raw response
+	 * @return ApiRequestResponse
+	 * @throws JSONException when JSON parsing error occurs
+	 */
+	private FoursquareApiRequestResponse handleApiResponse(Response response) throws JSONException {
+		JSONObject responseJson = null;
+		JSONArray notificationsJson = null;
+		String errorDetail = null;
+		if (response.getResponseCode() == 200) {
+			JSONObject responseObject = new JSONObject(response.getResponseContent());
+			responseJson = responseObject.getJSONObject("response");
+			notificationsJson = responseObject.optJSONArray("notifications");
+		} else {
+		  errorDetail = response.getMessage();
+		}
+	
+		return new FoursquareApiRequestResponse(new ResultMeta(response.getResponseCode(), "", errorDetail), responseJson, notificationsJson);
+	}
 }
+
