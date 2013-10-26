@@ -2,30 +2,34 @@ package com.pixeltron.maproulette.responses;
 
 import java.util.List;
 
-import com.pixeltron.maproulette.models.WaypointModel;
-
+import com.google.common.collect.Lists;
 import fi.foyt.foursquare.api.entities.CompactVenue;
 
 public class WaypointResponse {
-	public CompactVenue[] fullWaypoints;
-	public String[] waypointNames;
-	public WaypointModel[] waypoints;
+	public boolean isOK;
+	public WaypointResponseData data;
+	public List<String> errors;
 	
-	public WaypointResponse(List<CompactVenue> venues) {
-		int size = venues.size();
-		
-		CompactVenue[] venueData = new CompactVenue[size];
-		String[] venueNames = new String[size];
-		WaypointModel[] waypointInfo = new WaypointModel[size];
-		for (int i=0;i<size;i++) {
-			CompactVenue venue = venues.get(i);
-			venueData[i] = venue;
-			venueNames[i] = venue.getName();
-			waypointInfo[i] = new WaypointModel(venue);
+	public WaypointResponse() {
+		isOK = false;
+	}
+	
+	public void setData(List<CompactVenue> venues) {
+		data = new WaypointResponseData(venues);
+	}
+	
+	public void addError(String error) {
+		if (errors == null) {
+			errors = Lists.newArrayList();
 		}
-		
-		fullWaypoints = venueData;
-		waypointNames = venueNames;
-		waypoints = waypointInfo;
+		errors.add(error);
+	}
+	
+	public void prepareForTransport() {
+		if (errors != null && errors.isEmpty()) {
+			isOK = false;
+		} else {
+			isOK = true;
+		}
 	}
 }

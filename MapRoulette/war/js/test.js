@@ -3,33 +3,16 @@ var initialLocation = new google.maps.LatLng(39.3722, -104.856);
 var Geostart = "";
 var directionsDisplay;
 var directionsService = new google.maps.DirectionsService();
-var geoJSON = "http://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCXAjl_EPBIDiPzgd2Kzsn4ExvlUidESPA&sensor=true&address=";
-var fsq = "https://api.foursquare.com/v2/venues/explore?ll=";
-var fsqpoints = "&limit=";
-var fsqcaturl = "&section=";
-var fsqcats;
-var fsqqryurl = "&query=";
-var fsqqry;
-var fsqrecurl = "&novelty=";
-var fsqrec;
-var transMethod;
 var start, end;
-var startLL, endLL;
+var transMethod;
 var geocoder = new google.maps.Geocoder();
 var waypoints;
 var waypointsFull;
 var waynames;
-var maxWaypoints = 6;
-var numWaypoints;
-var convMiLL = 69;              // 69 miles = 1 latitude/longitude (average)
-var convLLMi = 0.000621371192;  // conversion factor for lat/long to miles
-var convMim = 1760;             // rough miles to meters
-var rise, run, distance, wpDist, risestep, runstep, rad;
 var fsq_token;
 var isDev;
 var isAuth;
 var notifications;
-var version = "&v=20121121";
 
 var fsqconfig = {
     //dev
@@ -82,9 +65,7 @@ function initialize() {
     if (pgurl.indexOf("mobile") != -1) {
         $('#tabs a:first').tab('show');
         addMobileStyle();
-        //$j('#map_canvas').addClass('mobile');
     }
-    //directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
     directionsDisplay = new google.maps.DirectionsRenderer();
     var mapOptions = {
         zoom: 12,
@@ -150,30 +131,58 @@ function initialize() {
 
 $("#fsqroute").submit(function (event) {
     event.preventDefault();
+    document.getElementById("gobtn").disabled = true;
+    $("#notifications").hide('fast');
+    notifications = "";
     start = $.trim(this.start.value);
     end = $.trim(this.end.value);
+    if ((start == "") || (end == "")) {
+        $("#notifications").show('fast');
+        $("#notifications").html("whoops! please enter both start and end points!");
+        document.getElementById("gobtn").disabled = false;
+    } else {
+        transMethod = this.transport.value;
 
-    var posting = $.post('/ajax/roulette', $(this).serialize());
+        var posting = $.post('/ajax/roulette', $(this).serialize());
 
-    posting.done(function (data) {
-        response = JSON.parse(data);
-        waynames = response.waypointNames;
-        waypoints = response.waypoints;
-        waypointsFull = response.fullWaypoints;
-        getDirections();
-    });
+        posting.done(function (data) {
+            response = JSON.parse(data);
+            if (response.isOK) {
+                waynames = response.data.waypointNames;
+                waypoints = response.data.waypoints;
+                waypointsFull = rsponse.data.fullWaypoints;
+                getDirections();
+            } else {
+                errfunc(response.errors);
+            }
+        });
+    }
 });
 
 function getRoute(form) {
+    document.getElementById("gobtn").disabled = true;
+    $("#notifications").hide('fast');
     start = $.trim(form.start.value);
     end = $.trim(form.end.value);
-    $.post('http://maproulette.appsot.com/ajax/roulette', $(form).serialize(), function (data) {
-        response = JSON.parse(data);
-        waynames = response.waypointNames;
-        waypoints = response.waypoints;
-        waypointsFull = rsponse.fullWaypoints;
-        getDirections();
-    });
+    if ((start == "") || (end == "")) {
+        $("#notifications").show('fast');
+        $("#notifications").html("whoops! please enter both start and end points!");
+        document.getElementById("gobtn").disabled = false;
+    } else {
+        transMethod = form.transport.value;
+
+        $.post('http://maproulette.appsot.com/ajax/roulette', $(form).serialize(), function (data) {
+            response = JSON.parse(data);
+            if (response.isOK) {
+                waynames = response.data.waypointNames;
+                waypoints = response.data.waypoints;
+                waypointsFull = rsponse.data.fullWaypoints;
+                getDirections();
+            } else {
+                errfunc(response.errors);
+            }
+        });
+    }
 }
 
 function getDirections() {
@@ -211,12 +220,6 @@ function getDirections() {
     document.getElementById("gobtn").disabled = false;
 }
 
-function storeFsqWaypoint(data, cur) {
-    waynames.push(name);
-    waypoints.push({ location: loc, stopover: true });
-    waypointsFull.push(data['response']['groups'][0]['items'][pl])
-}
-
 function modAddresses(dirresult) {
     var modResult = dirresult;
     for (var i = 0; i < dirresult.routes[0].legs.length; i++) {
@@ -224,17 +227,13 @@ function modAddresses(dirresult) {
         if (waypoints[i] != undefined) {
             if (i == 0) {
                 modResult.routes[0].legs[i].start_address = start;
-                //modResult.routes[0].legs[i].end_address = waypoints[i].location;
                 modResult.routes[0].legs[i].end_address = getWaypointDisplay(i);
             } else if (i == (dirresult.routes[0].legs.length - 1)) {
                 modResult.routes[0].legs[i].end_address = getWaypointDisplay(i - 1);
-                //modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
                 modResult.routes[0].legs[i].end_address = end;
             } else {
                 modResult.routes[0].legs[i].end_address = getWaypointDisplay(i - 1);
-                //modResult.routes[0].legs[i].start_address = waypoints[i - 1].location;
                 modResult.routes[0].legs[i].end_address = getWaypointDisplay(i);
-                //modResult.routes[0].legs[i].end_address = waypoints[i].location;
             }
         }
     }
@@ -266,10 +265,5 @@ function errfunc(data) {
     $("#notifications").html("whoops! we ran into an error. try again!");
     document.getElementById("gobtn").disabled = false;
 }
-
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 
 google.maps.event.addDomListener(window, 'load', initialize);

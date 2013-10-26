@@ -7,8 +7,6 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,21 +29,14 @@ import com.google.code.geocoder.model.LatLng;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
 import com.pixeltron.maproulette.responses.WaypointResponse;
 
-import fi.foyt.foursquare.api.FoursquareApi;
-import fi.foyt.foursquare.api.FoursquareApiException;
 import fi.foyt.foursquare.api.JSONFieldParser;
-import fi.foyt.foursquare.api.Result;
 import fi.foyt.foursquare.api.ResultMeta;
 import fi.foyt.foursquare.api.entities.CompactVenue;
-import fi.foyt.foursquare.api.entities.KeywordGroup;
 import fi.foyt.foursquare.api.entities.Recommendation;
 import fi.foyt.foursquare.api.entities.RecommendationGroup;
-import fi.foyt.foursquare.api.entities.Recommended;
-import fi.foyt.foursquare.api.entities.Warning;
 import fi.foyt.foursquare.api.io.Response;
 
 @SuppressWarnings("serial")
@@ -57,38 +48,39 @@ public class RouletteServlet extends HttpServlet {
 	public static final String FOURSQUARE_API_SECRET_PROD = "FYO552JTH34WSCYK0OZUMVMZUHTNCTOB02CVCWRPYPADP1CC";
 	
 	private static int CONV_MI_LL = 69;              		// 69 miles = 1 latitude/longitude (average)
-	private static double CONV_LL_MI = 0.000621371192;  	// conversion factor for lat/long to miles
+	//private static double CONV_LL_MI = 0.000621371192;  	// conversion factor for lat/long to miles
 	private static int CONV_MI_M = 1760;             		// rough miles to meters
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {		
-		String strResp = "";
 		String start = req.getParameter("start");
 		String end = req.getParameter("end");
 		String categories = req.getParameter("categories");
 		String search = req.getParameter("search");
 		String checkNew = req.getParameter("new");
 		String checkOld = req.getParameter("old");
-		String transport = req.getParameter("transport");
 		String oauth_token = req.getParameter("oauth_token");
 		String responseBody = "";
 		
 		Gson gson = new Gson();
+		WaypointResponse wayResp = new WaypointResponse();
 		
 		if (StringUtils.isNotBlank(start) && StringUtils.isNotBlank(end)) {
-//			HttpClient httpclient = HttpClients.createDefault();   
-//			HttpGet getLL = new HttpGet("http://maps.googleapis.com/maps/api/geocode/json?address=" + URLEncoder.encode(start, "utf-8") + "&sensor=false");
-//			HttpResponse response = httpclient.execute(getLL);
-//			responseBody = EntityUtils.toString(response.getEntity());
-//			getLL.releaseConnection();
-
-			final Geocoder geocoder = new Geocoder();
-			GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setAddress(start).setLanguage("en").getGeocoderRequest();
-			GeocodeResponse geocoderResponse = geocoder.geocode(geocoderRequest);
-			LatLng startLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
-			geocoderRequest = new GeocoderRequestBuilder().setAddress(end).setLanguage("en").getGeocoderRequest();
-			geocoderResponse = geocoder.geocode(geocoderRequest);
-			LatLng endLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
+			LatLng startLL = null;
+			LatLng endLL = null;
+			
+			try {
+				final Geocoder geocoder = new Geocoder();
+				GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setAddress(start).setLanguage("en").getGeocoderRequest();
+				GeocodeResponse geocoderResponse = geocoder.geocode(geocoderRequest);
+				startLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
+				geocoderRequest = new GeocoderRequestBuilder().setAddress(end).setLanguage("en").getGeocoderRequest();
+				geocoderResponse = geocoder.geocode(geocoderRequest);
+				endLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
+			} catch (Exception e) {
+				e.printStackTrace();
+				wayResp.addError("Exception thrown during geocoding.");
+			}
 			
 			if (startLL != null && endLL != null) {
 				// Set up math variables
@@ -97,7 +89,6 @@ public class RouletteServlet extends HttpServlet {
 				
                 double rise = startLL.getLng().doubleValue() - endLL.getLng().doubleValue();
                 double run = startLL.getLat().doubleValue() - endLL.getLat().doubleValue();
-                double slope = rise / run;
                 double risestep = rise / numWaypoints;
                 double runstep = run / numWaypoints;
                 double distance = Math.sqrt(rise * rise + run * run) * CONV_MI_LL;
@@ -135,9 +126,6 @@ public class RouletteServlet extends HttpServlet {
                     curWP.setLng(BigDecimal.valueOf(lng));
                     waypoints.add(curWP);
                 }
-                
-                List<RecommendationGroup> foursquareResults = Lists.newArrayList();
-                List<CompactVenue> venueResults = Lists.newArrayList();
                 
                 List<HTTPResponse> responses = Lists.newArrayList();
                 for (LatLng waypoint : waypoints) {
@@ -181,6 +169,7 @@ public class RouletteServlet extends HttpServlet {
 					}
                 }
                 
+                List<RecommendationGroup> foursquareResults = Lists.newArrayList();
                 for (HTTPResponse fsqresp : responses) {
                 	FoursquareApiRequestResponse response = handleApiResponse(
 		                			new Response(new String(fsqresp.getContent(), "UTF-8"), 
@@ -189,7 +178,10 @@ public class RouletteServlet extends HttpServlet {
              	
                     if (response.getMeta().getCode() == 200) {
                     	try {
-							RecommendationGroup[] groups = (RecommendationGroup[]) JSONFieldParser.parseEntities(RecommendationGroup.class, response.getResponse().getJSONArray("groups"), true);
+							RecommendationGroup[] groups = (RecommendationGroup[]) JSONFieldParser.parseEntities(
+											RecommendationGroup.class, 
+											response.getResponse().getJSONArray("groups"), 
+											true);
 							if (groups.length > 0) {
 								if (groups[0].getItems().length > 0)
 									foursquareResults.add(groups[0]);
@@ -200,6 +192,7 @@ public class RouletteServlet extends HttpServlet {
                     }
                 }
                 
+                List<CompactVenue> venueResults = Lists.newArrayList();
                 for (RecommendationGroup result : foursquareResults) {
                 		Recommendation[] venues = result.getItems();
                 		List<CompactVenue> venueData = Lists.newArrayList();
@@ -218,10 +211,17 @@ public class RouletteServlet extends HttpServlet {
                 }
                 
                 if (venueResults.size() > 0) {
-                	responseBody = gson.toJson(new WaypointResponse(venueResults));
+                	wayResp.setData(venueResults);
+                } else {
+                	wayResp.addError("Venue results was size 0");
                 }
+			} else {
+				wayResp.addError("Did not get valid start and end lat/lngs");
 			}
 		}
+		
+		wayResp.prepareForTransport();
+		responseBody = gson.toJson(resp);
 		resp.getOutputStream().println(responseBody);
 	}
 
