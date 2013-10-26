@@ -232,7 +232,6 @@ function getWaypointDisplay(index) {
     dispName += ", " + waypointsFull[index]['location']['address'];
     dispName += ", " + waypointsFull[index]['location']['city'];
     dispName += ", " + waypointsFull[index]['location']['state'];
-    dispName += ", " + waypointsFull[index]['location']['cc'];
 
     return dispName;
 }

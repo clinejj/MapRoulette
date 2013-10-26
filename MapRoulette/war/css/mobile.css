@@ -1,45 +1,49 @@
 html, body {
-			  height: 100%;
-			  margin: 0;
-			  padding: 0;
-			}
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
           
-      .form-horizontal .control-group {
-          margin-bottom: 10px;
-      }
+.form-horizontal .control-group {
+    margin-bottom: 10px;
+}
       
-      .styleform {
-        width: auto;
-        margin-left: 10px;
-      }
+.styleform {
+    width: auto;
+    margin-left: 10px;
+}
       
-      .foursquare {
-        width: auto;
-        text-align: center;
-      }
+.foursquare {
+    width: auto;
+    text-align: center;
+}
 
-			#map_canvas {
-			  height: 80%;
-			}
+#map_canvas {
+	height: 80%;
+}
             
-      #map_canvas img {
-          max-width: none;
-      }
+#map_canvas img {
+    max-width: none;
+}
 			
-			#progressbar {
-        display:block;
-        margin:0 auto;
-				height: 15px;
-				width: 200px;
-				overflow: hidden;
-        text-align: center;
-			}
+#progressbar {
+    display:block;
+    margin:0 auto;
+    height: 15px;
+    width: 200px;
+    overflow: hidden;
+    text-align: center;
+}
 			
-			#directions-panel {
-				height: 80%;
-				overflow: auto;
-			}
+#directions-panel {
+	height: 80%;
+	overflow: auto;
+}
 			
-      #gobtn {
-          width: 100px;
-      }
+#gobtn {
+    width: 100px;
+}
+
+.adp-step, .adp-text {
+    padding-left: 26px;
+}
