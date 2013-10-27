@@ -157,7 +157,7 @@ $("#fsqroute").submit(function (event) {
         goSpinner.stop();
         document.getElementById("gobtn").disabled = false;
     } else {
-        clearMarkers();
+        resetMap();
         var posting = $.post('/ajax/roulette', $(this).serialize());
 
         posting.done(function (data) {
@@ -283,9 +283,8 @@ function showResults() {
 
 function displayWaypoint(waypoint) {
     var latlng = new google.maps.LatLng(waypoint.location.lat, waypoint.location.lng);
-    var prefixSplit = waypoint.categories[0].icon.prefix.split('/');
-    var imageUrl = 'https://foursquare.com/img/categories/' + prefixSplit[prefixSplit.length - 2] + '/' + prefixSplit[prefixSplit.length - 1];
-    imageUrl = imageUrl + '32' + waypoint.categories[0].icon.suffix;
+    var prefix = waypoint.categories[0].icon.prefix.replace('_v2', '');
+    var imageUrl = prefix + '32' + waypoint.categories[0].icon.suffix;
     var marker = new google.maps.Marker({
         position: latlng,
         map: map,
