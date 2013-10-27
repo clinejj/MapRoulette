@@ -6,6 +6,8 @@ var directionsService = new google.maps.DirectionsService();
 var start, end;
 var transMethod;
 var geocoder = new google.maps.Geocoder();
+var startEndpoint;
+var endEndpoint;
 var waypoints;
 var waypointsFull;
 var waynames;
@@ -164,6 +166,8 @@ $("#fsqroute").submit(function (event) {
                 waynames = response.data.waypointNames;
                 waypoints = response.data.waypoints;
                 waypointsFull = response.data.fullWaypoints;
+                startEndpoint = response.data.start;
+                endEndpoint = response.data.end;
                 showResults();
             } else {
                 errfunc(response.errors);
@@ -174,17 +178,25 @@ $("#fsqroute").submit(function (event) {
 
 $("#results-form").submit(function (event) {
     event.preventDefault();
+    var stops = [];
+    $inputs = $('input', this);
+    for (i = 0; i < $inputs.length; i++) {
+        if ($inputs[i].checked) {
+            stops.push(waypoints[parseInt($inputs[i].value)]);
+        }
+    }
+    $("#route-notifications").hide('fast');
     transMethod = this.transport.value;
     document.getElementById("routebtn").disabled = true;
     routeSpinner.start();
-    getDirections();
+    getDirections(stops);
 });
 
-function getDirections() {
+function getDirections(stops) {
     var dirrequest = {
-        origin: start,
-        destination: end,
-        waypoints: this.waypoints,
+        origin: startEndpoint.location.lat + ", " + startEndpoint.location.lng,
+        destination: endEndpoint.location.lat + ", " + endEndpoint.location.lng,
+        waypoints: stops,
         provideRouteAlternatives: false,
         travelMode: google.maps.TravelMode.DRIVING
     };
@@ -200,17 +212,22 @@ function getDirections() {
 
     directionsService.route(dirrequest, function (dirresult, dirstatus) {
         if (dirstatus == google.maps.DirectionsStatus.OK) {
+            clearMarkers();
+            directionsDisplay.setMap(map);
             directionsDisplay.setDirections(modAddresses(dirresult));
             if (notifications != "") {
-                $("#notifications").show('fast');
-                $("#notifications").html(notifications);
+                $("#route-notifications").show('fast');
+                $("#route-notifications").html(notifications);
             }
+            $('#directions-panel').show();
+            $('#directions-panel').animate({ width: '350px' }, 350);
         } else {
-            $("#notifications").show('fast');
-            $("#notifications").html("whoops! couldn't get directions. try again!");
-            console.log("Directions was not successful for the following reason: " + dirstatus);
+            $("#route-notifications").show('fast');
+            $("#route-notifications").html("whoops! couldn't get directions. try again!");
+            console.log("Directions was not successful: " + dirstatus);
         }
     });
+
     routeSpinner.stop();
     document.getElementById("routebtn").disabled = false;
 }
@@ -246,13 +263,20 @@ function getWaypointDisplay(index) {
 
 function showResults() {
     wayMarkers = [];
+    displayEndpoint(startEndpoint);
+    displayEndpoint(endEndpoint);
     for (var i = 0; i < waypointsFull.length; i++) {
         displayWaypoint(waypointsFull[i]);
         var waypointHTML = generateWaypointFormHTML(waypointsFull[i], i);
         $('#results-list').append(waypointHTML);
     }
-    $('#results-form').show();
-    $("#results-panel").animate({width:'220px'},350);
+    $('#results-list address').on('click', function(event) {
+        var index = $('input', this).val();
+        var waypoint = waypointsFull[index];
+        map.setCenter(new google.maps.LatLng(waypoint.location.lat, waypoint.location.lng));
+    });
+    $('#results-panel').show();
+    $("#results-panel").animate({width:'238px'},350);
     goSpinner.stop();
     document.getElementById("gobtn").disabled = false;
 }
@@ -272,20 +296,20 @@ function displayWaypoint(waypoint) {
     wayMarkers.push(marker);
 }
 
-function generateWaypointFormHTML(waypoint, index) {
-    /*
-        <div class="checkbox">
-        <address>
-        <label>
-        <input type="checkbox" value="">
-            <strong>Twitter, Inc.</strong><br>
-            795 Folsom Ave, Suite 600<br>
-            San Francisco, CA 94107<br>
-        </label>
-        </address>
-    </div>
-    */
+function displayEndpoint(endpoint) {
+    var latlng = new google.maps.LatLng(endpoint.location.lat, endpoint.location.lng);
+    var imageUrl = 'http://mt.google.com/vt/icon?psize=30&font=fonts/arialuni_t.ttf&color=ff304C13&name=icons/spotlight/spotlight-waypoint-a.png&ax=43&ay=48&text=%E2%80%A2';
+    var marker = new google.maps.Marker({
+        position: latlng,
+        map: map,
+        title: endpoint.name,
+        icon: imageUrl
+    });
 
+    wayMarkers.push(marker);
+}
+
+function generateWaypointFormHTML(waypoint, index) {
     var html = '<div class="checkbox"><address><label>';
     html = html + '<input type="checkbox" name="' + index + '" value="' + index + '"/>';
     html = html + '<strong>' + waypoint.name + '</strong><br>'
@@ -300,7 +324,22 @@ function clearMarkers() {
     for (var i = 0; i < wayMarkers.length; i++) {
         wayMarkers[i].setMap(null);
     }
+}
+
+function showMarkers() {
+    for (var i = 0; i < wayMarkers.length; i++) {
+        wayMarkers[i].setMap(map);
+    }
+}
+
+function resetMap() {
+    clearMarkers();
+    $("#results-list").empty();
     $("#results-panel").animate({width:'0px'},0);
+    $("#results-panel").hide();
+    $('#directions-panel').animate({width:'0px'},0);
+    $('#directions-panel').hide();
+    directionsDisplay.setMap(null);
 }
 
 function placeMarker(location) {
@@ -332,6 +371,14 @@ $('#toggle-options').on('click', function (event) {
     } else {
         $('#search-options').slideDown('fast');
     }   
+});
+
+$('#back-results').on('click', function (event) {
+    event.preventDefault();
+    $('#directions-panel').animate({ width: '0px' }, 350);
+    $('#directions-panel').hide();
+    directionsDisplay.setMap(null);
+    showMarkers();
 });
 
 google.maps.event.addDomListener(window, 'load', initialize);

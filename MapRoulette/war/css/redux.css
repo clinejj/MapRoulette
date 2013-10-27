@@ -85,9 +85,11 @@ form {
 }
 
 #results-panel {
+    display: none;
     z-index: 30;
 	width: 0px;
-	overflow: hidden;
+	max-height: 400px;
+    overflow-y: auto;
     position: fixed;
     right: 0;
     top: 128px;
@@ -110,7 +112,6 @@ form {
 }
 
 #results-form {
-    display: none;
     padding-left: 8px;
     padding-right: 8px;
 }
@@ -129,6 +130,33 @@ form {
 #routebtn {
     display: inline-block;
     width: 94px;
+}
+
+#route-notifications {
+    padding: 8px;
+    text-align: center;
+}
+
+#directions-panel {
+    position: fixed;
+    display: none;
+    width: 0px;
+    right: 0;
+    z-index: 50;
+    background: #fff;
+    padding-left: 8px;
+    padding-right: 8px;
+    top: 128px;
+    max-height: 400px;
+    overflow-y: auto;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
 }
 			
 #map-canvas {
