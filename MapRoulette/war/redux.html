@@ -19,7 +19,7 @@
                 <label for="fsqend">end: <input id="fsqend" type="text" name="end" size="40" class="form-control"/></label>
                 <a id="toggle-options" class="btn btn-default">options <span class="caret"></span></a>
                 <input id="oauth_token" type="hidden" name="oauth_token"/>
-                <button id="gobtn" type="submit" class="btn btn-primary ladda-button" data-style="contract"><span class="ladd-label">go</span></button>
+                <button id="gobtn" type="submit" class="btn btn-primary ladda-button" data-style="contract"><span class="ladda-label">go</span></button>
                 <div id="search-options">
                     <label for="sections">category: 
                         <select name="categories" id="sections" class="form-control">
@@ -33,27 +33,36 @@
                         </select>
                     </label>
                     <label for="search">search: <input id="search" type="text" name="search" size="40" class="form-control"/></label>
-                    
-                    <label id="newreclbl" for="newrec" class="checkbox-inline"><input type="checkbox" name="new" id="newrec" value="new" checked/> new</label>
-                    
-                    <label id="oldreclbl" for="oldrec" class="checkbox-inline"><input type="checkbox" name="old" id="oldrec" value="old" checked/> old</label>
+                    <div id="recbuttons">                    
+                        <label id="newreclbl" for="newrec" class="checkbox-inline"><input type="checkbox" name="new" id="newrec" value="new" checked/> new</label>
+                        <label id="oldreclbl" for="oldrec" class="checkbox-inline"><input type="checkbox" name="old" id="oldrec" value="old" checked/> old</label>
+                    </div>
                     <div id="foursquare" class="foursquare">
                         <a href="javascript:doAuthRedirect()"><img src="img/connect-white.png" alt="foursquare" style="padding-top: 5px;"></a>
                     </div>
                 </div>
-                <!--
-                <select name="transport" id="transport">
-                    <option value="driving" selected>driving</option>
-                    <option value="transit">transit</option>
-                    <option value="biking">biking</option>
-                    <option value="walking">walking</option>
-                </select>
-                -->
             </form>
         </div>
         <div id="notifications"></div>
     </div>
-    <div id="directions-panel"></div>
+    <div id="results-panel">
+        <div class="results-header">Results:</div>
+        <div id="results-form-container">
+            <form id="results-form" role="form">
+                <div id="results-list" class="results-list">    
+                </div>
+                <div class="transport-row"> 
+                    <select name="transport" id="transport" class="form-control input-sm">
+                        <option value="driving" selected>driving</option>
+                        <option value="transit">transit</option>
+                        <option value="biking">biking</option>
+                        <option value="walking">walking</option>
+                    </select>
+                    <button id="routebtn" type="submit" class="btn btn-primary ladda-button input-sm" data-style="contract"><span class="ladda-label">route</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="map-canvas"></div>
     
     <script type="text/javascript">

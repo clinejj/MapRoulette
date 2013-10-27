@@ -21,19 +21,6 @@ form {
     padding-left: 30px;
 }
 			
-#directions-panel {
-	height: 80%;
-	float: right;
-	width: 390px;
-	overflow: auto;
-    display: none;
-}
-			
-#map-canvas {
-	width:  100%;
-    height:  100%;
-}
-			
 #control {
 	background: #fff;
 	padding: 5px;
@@ -79,6 +66,10 @@ form {
     width:  30px;
 }
 
+#recbuttons {
+    display: none;
+}
+
 #foursquare {
     display: inline-block;
     vertical-align: top;
@@ -91,4 +82,56 @@ form {
 .ladda-button[data-style=contract][data-loading] {
     width:  32px;
     margin-left: 8px;
+}
+
+#results-panel {
+    z-index: 30;
+	width: 0px;
+	overflow: hidden;
+    position: fixed;
+    right: 0;
+    top: 128px;
+    background: #fff;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+}
+
+.results-header {
+    font-weight: bold;
+    padding: 8px;
+    font-size: 16px;
+    padding-bottom: 0px;
+}
+
+#results-form {
+    display: none;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.transport-row {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+#results-form select {
+    display: inline-block;
+    width: 94px;
+    margin-right: 10px;
+}
+
+#routebtn {
+    display: inline-block;
+    width: 94px;
+}
+			
+#map-canvas {
+	width:  100%;
+    height:  100%;
 }

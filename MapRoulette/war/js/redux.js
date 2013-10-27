@@ -14,7 +14,8 @@ var fsq_token;
 var isDev;
 var isAuth;
 var notifications;
-var spinner;
+var goSpinner;
+var routeSpinner;
 
 var fsqconfig = {
     //dev
@@ -129,22 +130,19 @@ function initialize() {
         map.setCenter(initialLocation);
     }
 
-    if (!isAuth) {
-        $("#newrec").css("display", "none");
-        $("#newreclbl").css("display", "none");
-        $("#oldrec").css("display", "none");
-        $("#oldreclbl").css("display", "none");
-        $("#recbuttons").css("display", "none");
+    if (isAuth) {
+        $("#recbuttons").css("display", "inline-block");
     }
 
     wayMarkers = [];
-    spinner = Ladda.create($('#gobtn')[0]); //Ladda.bind( 'input[type=submit]' );//
+    goSpinner = Ladda.create($('#gobtn')[0]);
+    routeSpinner = Ladda.create($('#routebtn')[0]);
 }
 
 $("#fsqroute").submit(function (event) {
     event.preventDefault();
     document.getElementById("gobtn").disabled = true;
-    spinner.start();
+    goSpinner.start();
     $("#notifications").hide('fast');
     $('#fsqform').css('margin-bottom', '0px');
     notifications = "";
@@ -154,10 +152,9 @@ $("#fsqroute").submit(function (event) {
         $("#notifications").show('fast');
         $('#fsqform').css('margin-bottom', '6px');
         $("#notifications").html("whoops! please enter both start and end points!");
-        spinner.stop();
+        goSpinner.stop();
         document.getElementById("gobtn").disabled = false;
     } else {
-        //transMethod = this.transport.value;
         clearMarkers();
         var posting = $.post('/ajax/roulette', $(this).serialize());
 
@@ -168,12 +165,19 @@ $("#fsqroute").submit(function (event) {
                 waypoints = response.data.waypoints;
                 waypointsFull = response.data.fullWaypoints;
                 showResults();
-                //getDirections();
             } else {
                 errfunc(response.errors);
             }
         });
     }
+});
+
+$("#results-form").submit(function (event) {
+    event.preventDefault();
+    transMethod = this.transport.value;
+    document.getElementById("routebtn").disabled = true;
+    routeSpinner.start();
+    getDirections();
 });
 
 function getDirections() {
@@ -207,8 +211,8 @@ function getDirections() {
             console.log("Directions was not successful for the following reason: " + dirstatus);
         }
     });
-    spinner.stop();
-    document.getElementById("gobtn").disabled = false;
+    routeSpinner.stop();
+    document.getElementById("routebtn").disabled = false;
 }
 
 function modAddresses(dirresult) {
@@ -244,8 +248,12 @@ function showResults() {
     wayMarkers = [];
     for (var i = 0; i < waypointsFull.length; i++) {
         displayWaypoint(waypointsFull[i]);
+        var waypointHTML = generateWaypointFormHTML(waypointsFull[i], i);
+        $('#results-list').append(waypointHTML);
     }
-    spinner.stop();
+    $('#results-form').show();
+    $("#results-panel").animate({width:'220px'},350);
+    goSpinner.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
@@ -264,10 +272,35 @@ function displayWaypoint(waypoint) {
     wayMarkers.push(marker);
 }
 
+function generateWaypointFormHTML(waypoint, index) {
+    /*
+        <div class="checkbox">
+        <address>
+        <label>
+        <input type="checkbox" value="">
+            <strong>Twitter, Inc.</strong><br>
+            795 Folsom Ave, Suite 600<br>
+            San Francisco, CA 94107<br>
+        </label>
+        </address>
+    </div>
+    */
+
+    var html = '<div class="checkbox"><address><label>';
+    html = html + '<input type="checkbox" name="' + index + '" value="' + index + '"/>';
+    html = html + '<strong>' + waypoint.name + '</strong><br>'
+    html = html + waypoint.location.address + '<br>';
+    html = html + waypoint.location.city + ', ' + waypoint.location.state;
+    html = html + ' ' + waypoint.location.postalCode + '<br>';
+    html = html + '</label></address></div>';
+    return html;
+}
+
 function clearMarkers() {
     for (var i = 0; i < wayMarkers.length; i++) {
         wayMarkers[i].setMap(null);
     }
+    $("#results-panel").animate({width:'0px'},0);
 }
 
 function placeMarker(location) {
@@ -278,7 +311,7 @@ function placeMarker(location) {
 }
 
 function errfunc(data) {
-    spinner.stop();
+    goSpinner.stop();
     console.log(data);
     $('#fsqform').css('margin-bottom', '6px');
     $("#notifications").show('fast');
@@ -295,9 +328,9 @@ function addMobileStyle() {
 $('#toggle-options').on('click', function (event) {
     event.preventDefault();
     if ($('#search-options').css('display') == 'block') {
-        $('#search-options').hide('fast');
+        $('#search-options').slideUp('fast');
     } else {
-        $('#search-options').show('fast');
+        $('#search-options').slideDown('fast');
     }   
 });
 
