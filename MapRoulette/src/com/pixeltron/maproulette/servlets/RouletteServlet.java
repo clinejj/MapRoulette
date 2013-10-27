@@ -7,6 +7,8 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,15 +22,12 @@ import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
-import com.google.code.geocoder.Geocoder;
-import com.google.code.geocoder.GeocoderRequestBuilder;
-import com.google.code.geocoder.model.GeocodeResponse;
-import com.google.code.geocoder.model.GeocoderRequest;
-import com.google.code.geocoder.model.GeocoderStatus;
 import com.google.code.geocoder.model.LatLng;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
+import com.pixeltron.mapquest.open.geocoding.GeocodingRequest;
+import com.pixeltron.mapquest.open.geocoding.GeocodingResponse;
 import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
 import com.pixeltron.maproulette.responses.WaypointResponse;
 
@@ -69,23 +68,31 @@ public class RouletteServlet extends HttpServlet {
 			LatLng startLL = null;
 			LatLng endLL = null;
 			
-			try {
-				final Geocoder geocoder = new Geocoder();
-				GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setAddress(start).setLanguage("en").getGeocoderRequest();
-				GeocodeResponse geocoderResponse = geocoder.geocode(geocoderRequest);
-				if (geocoderResponse.getStatus().equals(GeocoderStatus.OK)) {
-					startLL = geocoderResponse.getResults().get(0).getGeometry().getLocation();
-				} else {
-					wayResp.addError("Start geocode error: " + geocoderResponse.getStatus().value());
-				}
-				
-				geocoderRequest = new GeocoderRequestBuilder().setAddress(end).setLanguage("en").getGeocoderRequest();
-				geocoderResponse = geocoder.geocode(geocoderRequest);
-				if (geocoderResponse.getStatus().equals(GeocoderStatus.OK)) {
-					endLL = geocoderResponse.getResults().get(0).getGeometry().getLocation();
-				} else {
-					wayResp.addError("End geocode error: " + geocoderResponse.getStatus().value());
-				}
+			URLFetchService fetch = URLFetchServiceFactory.getURLFetchService();
+			GeocodingRequest geoReq = new GeocodingRequest();
+
+			Future<HTTPResponse> geoFuture = fetch.fetchAsync(new URL(geoReq.buildUrl(start, end, false)));
+        	try {
+        		HTTPResponse geoResp = geoFuture.get();
+        		if (geoResp.getResponseCode() == 200) {
+        			GeocodingResponse geoResults = gson.fromJson(new String(geoResp.getContent(), "UTF-8"), GeocodingResponse.class);
+        			if (geoResults.results.length > 1) {
+        				if (geoResults.results[0].locations.length > 0) {
+        					startLL = new LatLng(geoResults.results[0].locations[0].latLng.lat, geoResults.results[0].locations[0].latLng.lng);
+        				} else {
+        					wayResp.addError("Did not get enough geocode results back for start.");
+        				}
+        				if (geoResults.results[1].locations.length > 0) {
+        					endLL = new LatLng(geoResults.results[1].locations[0].latLng.lat, geoResults.results[1].locations[0].latLng.lng);
+        				} else {
+        					wayResp.addError("Did not get enough geocode results back for end.");
+        				}
+        			} else {
+        				wayResp.addError("Did not get enough geocode results back.");
+        			}
+        		} else {
+        			wayResp.addError("Error during geocode: " + Integer.toString(geoResp.getResponseCode()));
+        		}	
 			} catch (Exception e) {
 				e.printStackTrace();
 				wayResp.addError("Exception thrown during geocoding: " + e.getMessage());
@@ -138,7 +145,7 @@ public class RouletteServlet extends HttpServlet {
                 
                 List<HTTPResponse> responses = Lists.newArrayList();
                 for (LatLng waypoint : waypoints) {
-                	URLFetchService fetch = URLFetchServiceFactory.getURLFetchService();
+                	fetch = URLFetchServiceFactory.getURLFetchService();
                 	StringBuilder urlBuilder = new StringBuilder("https://api.foursquare.com/v2/venues/explore?ll=");
                 	urlBuilder.append(waypoint.toUrlValue());
                 	urlBuilder.append("&limit=6&client_id=GWCCYYFINDKJ1A3JUY0KMUAEXX5UQ0EGHTQPPGUGLTVAKNUK&client_secret=JYUTNCPVW4K0JLGFYS3ROLHHDEFPZOJSPP2R0RJHZBTOCQJO&v=20131013");
