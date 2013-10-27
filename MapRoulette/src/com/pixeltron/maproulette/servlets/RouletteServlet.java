@@ -20,12 +20,13 @@ import org.json.JSONObject;
 import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
-import com.google.code.geocoder.model.LatLng;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
 import com.pixeltron.mapquest.open.geocoding.GeocodingRequest;
 import com.pixeltron.mapquest.open.geocoding.GeocodingResponse;
+import com.pixeltron.mapquest.open.geocoding.LatLng;
+import com.pixeltron.maproulette.models.EndpointModel;
 import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
 import com.pixeltron.maproulette.responses.WaypointResponse;
 
@@ -76,12 +77,12 @@ public class RouletteServlet extends HttpServlet {
         			GeocodingResponse geoResults = gson.fromJson(new String(geoResp.getContent(), "UTF-8"), GeocodingResponse.class);
         			if (geoResults.results.length > 1) {
         				if (geoResults.results[0].locations.length > 0) {
-        					startLL = new LatLng(geoResults.results[0].locations[0].latLng.lat, geoResults.results[0].locations[0].latLng.lng);
+        					startLL = geoResults.results[0].locations[0].latLng;
         				} else {
         					wayResp.addError("Did not get enough geocode results back for start.");
         				}
         				if (geoResults.results[1].locations.length > 0) {
-        					endLL = new LatLng(geoResults.results[1].locations[0].latLng.lat, geoResults.results[1].locations[0].latLng.lng);
+        					endLL = geoResults.results[1].locations[0].latLng;
         				} else {
         					wayResp.addError("Did not get enough geocode results back for end.");
         				}
@@ -101,8 +102,8 @@ public class RouletteServlet extends HttpServlet {
 				Random rand = new Random();
 				int numWaypoints = rand.nextInt(6) + 1;
 				
-                double rise = startLL.getLng().doubleValue() - endLL.getLng().doubleValue();
-                double run = startLL.getLat().doubleValue() - endLL.getLat().doubleValue();
+                double rise = startLL.lng.doubleValue() - endLL.lng.doubleValue();
+                double run = startLL.lat.doubleValue() - endLL.lat.doubleValue();
                 double risestep = rise / numWaypoints;
                 double runstep = run / numWaypoints;
                 double distance = Math.sqrt(rise * rise + run * run) * CONV_MI_LL;
@@ -113,15 +114,15 @@ public class RouletteServlet extends HttpServlet {
                 
                 // Build waypoints
                 LatLng nextWP = new LatLng();
-                nextWP.setLat(BigDecimal.valueOf(startLL.getLat().doubleValue() - runstep));
-                nextWP.setLng(BigDecimal.valueOf(startLL.getLng().doubleValue() - risestep));
+                nextWP.lat = BigDecimal.valueOf(startLL.lat.doubleValue() - runstep);
+                nextWP.lng = BigDecimal.valueOf(startLL.lng.doubleValue() - risestep);
                 List<LatLng> waypoints = Lists.newArrayList();
                 for (int i=0;i<numWaypoints;i++) {
-                    double lat = nextWP.getLat().doubleValue();
-                    double lng = nextWP.getLng().doubleValue();
+                    double lat = nextWP.lat.doubleValue();
+                    double lng = nextWP.lng.doubleValue();
                     nextWP = new LatLng();
-                    nextWP.setLat(BigDecimal.valueOf(lat - runstep));
-                    nextWP.setLng(BigDecimal.valueOf(lng - risestep));
+                    nextWP.lat = BigDecimal.valueOf(lat - runstep);
+                    nextWP.lng = BigDecimal.valueOf(lng - risestep);
 
                     // Randomize lat/long
                     if (rand.nextDouble() > 0.5) {
@@ -136,8 +137,8 @@ public class RouletteServlet extends HttpServlet {
                     }
                     
                     LatLng curWP = new LatLng();
-                    curWP.setLat(BigDecimal.valueOf(lat));
-                    curWP.setLng(BigDecimal.valueOf(lng));
+                    curWP.lat = BigDecimal.valueOf(lat);
+                    curWP.lng = BigDecimal.valueOf(lng);
                     waypoints.add(curWP);
                 }
                 
@@ -221,6 +222,7 @@ public class RouletteServlet extends HttpServlet {
                 
                 if (venueResults.size() > 0) {
                 	wayResp.setData(venueResults);
+                	wayResp.setEndpoints(new EndpointModel(start, startLL), new EndpointModel(end, endLL));
                 } else {
                 	wayResp.addError("Venue results was size 0");
                 }
