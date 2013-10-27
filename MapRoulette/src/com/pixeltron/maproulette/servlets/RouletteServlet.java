@@ -218,6 +218,8 @@ public class RouletteServlet extends HttpServlet {
 			} else {
 				wayResp.addError("Did not get valid start and end lat/lngs");
 			}
+		} else {
+			wayResp.addError("Must specify a valid start and end address.");
 		}
 		
 		wayResp.prepareForTransport();
