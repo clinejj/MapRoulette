@@ -1,0 +1,94 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+             
+label {
+  display: inline;
+  padding:  3px;
+}
+             
+button {
+  vertical-align: inherit;
+}
+
+form {
+  margin: 0px;
+}
+
+.adp-text {
+    padding-left: 30px;
+}
+			
+#directions-panel {
+	height: 80%;
+	float: right;
+	width: 390px;
+	overflow: auto;
+    display: none;
+}
+			
+#map-canvas {
+	width:  100%;
+    height:  100%;
+}
+			
+#control {
+	background: #fff;
+	padding: 5px;
+	font-size: 14px;
+	font-family: Arial;
+	border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+    text-align: center;
+    position: fixed;
+    width: 712px;
+    z-index: 30;
+    left: 50%;
+    top: 28px;
+    margin-left: -314px;
+    padding: 8px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#control label {
+    font-weight: normal;
+}
+
+#control input {
+    width:  210px;
+}
+
+#control select {
+    width: 80px;
+}
+
+#toggle-options {
+    border:  none;
+}
+
+#search-options {
+    display: none;
+    margin-top: 8px;
+}
+
+#search-options #newrec, #search-options #oldrec {
+    width:  30px;
+}
+
+#foursquare {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#notifications {
+    display: none;
+}
+
+.ladda-button[data-style=contract][data-loading] {
+    width:  32px;
+    margin-left: 8px;
+}
