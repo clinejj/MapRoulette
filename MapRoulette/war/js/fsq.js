@@ -89,7 +89,7 @@ function initialize() {
         center: initialLocation,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+    map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     directionsDisplay.setMap(map);
     directionsDisplay.setPanel(document.getElementById("directions-panel"));
 
@@ -260,7 +260,7 @@ function errfunc(data) {
 }
 
 function addMobileStyle() {
-    var currTabElem = document.getElementById("map_canvas");
+    var currTabElem = document.getElementById("map-canvas");
 
     currTabElem.setAttribute("style", "width: "+window.innerWidth+"px;height: "+window.innerHeight*.65+"px;");
 }

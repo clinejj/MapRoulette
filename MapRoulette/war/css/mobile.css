@@ -22,11 +22,11 @@ html, body {
     text-align: center;
 }
 
-#map_canvas {
+#map-canvas {
 	height: 80%;
 }
             
-#map_canvas img {
+#map-canvas img {
     max-width: none;
 }
 			

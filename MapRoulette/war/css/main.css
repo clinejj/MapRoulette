@@ -21,7 +21,7 @@ form {
     padding-left: 30px;
 }
 			
-#map_canvas {
+#map-canvas {
 	height: 80%;
 }
 			
@@ -30,10 +30,6 @@ form {
 	float: right;
 	width: 390px;
 	overflow: auto;
-}
-			
-#map-canvas {
-	margin-right: 400px;
 }
 			
 #control {
