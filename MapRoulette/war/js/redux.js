@@ -9,6 +9,7 @@ var geocoder = new google.maps.Geocoder();
 var waypoints;
 var waypointsFull;
 var waynames;
+var wayMarkers;
 var fsq_token;
 var isDev;
 var isAuth;
@@ -100,13 +101,15 @@ function initialize() {
             initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setCenter(initialLocation);
             Geostart = initialLocation.toUrlValue();
+            var lname = 'Your location';
             geocoder.geocode({ 'latLng': initialLocation }, function (results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
-                    var lname = results[0].formatted_address;
+                    lname = results[0].formatted_address;
                     if (!isDev) {
                         document.getElementById('fsqstart').value = lname;
                     }
                 } else {
+                    lname = Geostart;
                     if (!isDev) {
                         document.getElementById('fsqstart').value = Geostart;
                     }
@@ -115,8 +118,10 @@ function initialize() {
 
             marker = new google.maps.Marker({
                 position: initialLocation,
-                map: map
+                map: map,
+                title: lname
             });
+           
         }, function () {
             map.setCenter(initialLocation);
         });
@@ -124,12 +129,6 @@ function initialize() {
         map.setCenter(initialLocation);
     }
 
-    //click to add a marker
-    /*
-    google.maps.event.addListener(map, 'click', function(event) {
-    placeMarker(event.latLng);
-    });
-    */
     if (!isAuth) {
         $("#newrec").css("display", "none");
         $("#newreclbl").css("display", "none");
@@ -138,6 +137,7 @@ function initialize() {
         $("#recbuttons").css("display", "none");
     }
 
+    wayMarkers = [];
     spinner = Ladda.create($('#gobtn')[0]); //Ladda.bind( 'input[type=submit]' );//
 }
 
@@ -157,8 +157,8 @@ $("#fsqroute").submit(function (event) {
         spinner.stop();
         document.getElementById("gobtn").disabled = false;
     } else {
-        transMethod = this.transport.value;
-
+        //transMethod = this.transport.value;
+        clearMarkers();
         var posting = $.post('/ajax/roulette', $(this).serialize());
 
         posting.done(function (data) {
@@ -167,7 +167,8 @@ $("#fsqroute").submit(function (event) {
                 waynames = response.data.waypointNames;
                 waypoints = response.data.waypoints;
                 waypointsFull = response.data.fullWaypoints;
-                getDirections();
+                showResults();
+                //getDirections();
             } else {
                 errfunc(response.errors);
             }
@@ -239,19 +240,49 @@ function getWaypointDisplay(index) {
     return dispName;
 }
 
+function showResults() {
+    wayMarkers = [];
+    for (var i = 0; i < waypointsFull.length; i++) {
+        displayWaypoint(waypointsFull[i]);
+    }
+    spinner.stop();
+    document.getElementById("gobtn").disabled = false;
+}
+
+function displayWaypoint(waypoint) {
+    var latlng = new google.maps.LatLng(waypoint.location.lat, waypoint.location.lng);
+    var prefixSplit = waypoint.categories[0].icon.prefix.split('/');
+    var imageUrl = 'https://foursquare.com/img/categories/' + prefixSplit[prefixSplit.length - 2] + '/' + prefixSplit[prefixSplit.length - 1];
+    imageUrl = imageUrl + '32' + waypoint.categories[0].icon.suffix;
+    var marker = new google.maps.Marker({
+        position: latlng,
+        map: map,
+        title: waypoint.name,
+        icon: imageUrl
+    });
+
+    wayMarkers.push(marker);
+}
+
+function clearMarkers() {
+    for (var i = 0; i < wayMarkers.length; i++) {
+        wayMarkers[i].setMap(null);
+    }
+}
+
 function placeMarker(location) {
     var marker = new google.maps.Marker({
         position: location,
         map: map
     });
-    map.setCenter(location);
 }
 
 function errfunc(data) {
+    spinner.stop();
     console.log(data);
+    $('#fsqform').css('margin-bottom', '6px');
     $("#notifications").show('fast');
     $("#notifications").html("whoops! we ran into an error. try again!");
-    spinner.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
