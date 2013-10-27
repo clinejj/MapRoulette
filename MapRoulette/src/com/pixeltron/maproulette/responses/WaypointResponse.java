@@ -26,7 +26,7 @@ public class WaypointResponse {
 	}
 	
 	public void prepareForTransport() {
-		if (errors != null && errors.isEmpty()) {
+		if (errors != null && !errors.isEmpty()) {
 			isOK = false;
 		} else {
 			isOK = true;
