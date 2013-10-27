@@ -3,9 +3,18 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
-          
+ 
 .form-horizontal .control-group {
     margin-bottom: 10px;
+}
+
+#recbuttons {
+    margin-bottom: 0px;
+}
+
+#recbuttons label.checkbox {
+    display: inline-block;
+    margin-right: 40px;
 }
       
 .foursquare {
@@ -19,15 +28,6 @@ html, body {
             
 #map_canvas img {
     max-width: none;
-}
-			
-#progressbar {
-    display:block;
-    margin:0 auto;
-    height: 15px;
-    width: 200px;
-    overflow: hidden;
-    text-align: center;
 }
 			
 #directions-panel {
