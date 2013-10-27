@@ -222,6 +222,7 @@ public class RouletteServlet extends HttpServlet {
 		
 		wayResp.prepareForTransport();
 		responseBody = gson.toJson(wayResp);
+		resp.setCharacterEncoding("UTF-8");
 		resp.getOutputStream().println(responseBody);
 	}
 
