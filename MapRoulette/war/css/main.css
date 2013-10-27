@@ -25,15 +25,6 @@ form {
 	height: 80%;
 }
 			
-#progressbar {
-  display:block;
-  margin:0 auto;
-	height: 15px;
-	width: 200px;
-	overflow: hidden;
-  text-align: center;
-}
-			
 #directions-panel {
 	height: 80%;
 	float: right;
