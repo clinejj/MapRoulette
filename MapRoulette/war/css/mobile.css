@@ -47,3 +47,8 @@ html, body {
 .adp-step, .adp-text {
     padding-left: 26px;
 }
+
+#gobtn.ladda-button[data-style=contract][data-loading] {
+    width:  32px;
+    margin-left: 34px;
+}

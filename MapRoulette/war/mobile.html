@@ -7,6 +7,7 @@
     <link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" rel="stylesheet" /> 
     <link type="text/css" href="css/bootstrap.min.css" rel="stylesheet"/>
     <link type="text/css" href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link type="text/css" href="css/ladda-themeless.min.css" rel="stylesheet"/>
     <link type="text/css" href="css/mobile.css" rel="stylesheet">
   </head>
   <body>
@@ -69,12 +70,11 @@
                 <div class="control-group">
                     <div class="controls">
                         <input id="oauth_token" type="hidden" name="oauth_token"/>
-                        <input id="gobtn" type="submit" value="go" class="btn btn-primary"/>
+                        <button id="gobtn" type="submit" class="btn btn-primary ladda-button" data-style="contract"><span class="ladd-label">go</span></button>
                     </div>
                 </div>
             </form>
         </div>
-        <div id="progressbar" class="progress progress-striped active"></div>
         <div id="notifications"></div>
         <div id="foursquare" class="foursquare">
         <a href="javascript:doAuthRedirect()"><img src="img/connect-white.png" alt="foursquare" style="padding-top: 5px;"></a>
@@ -107,6 +107,8 @@
     <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/oauth.js"></script>
     <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/sha1.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/spin.min.js"></script>
+    <script type="text/javascript" src="js/ladda.min.js"></script>
     <script type="text/javascript" src="js/fsq.js"></script>
   </body>
 </html>

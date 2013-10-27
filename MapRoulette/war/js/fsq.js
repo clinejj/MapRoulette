@@ -13,7 +13,7 @@ var fsq_token;
 var isDev;
 var isAuth;
 var notifications;
-var l;
+var spinner;
 
 var fsqconfig = {
     //dev
@@ -66,7 +66,7 @@ function initialize() {
         isDev = true;
     }
     
-    if (window.mobilecheck()) {
+    if (window.mobilecheck && window.mobilecheck()) {
       var newurl = "http://maproulette.appspot.com";
       if (isDev) {
         newurl = "http://localhost:8888";
@@ -82,7 +82,7 @@ function initialize() {
         $('#tabs a:first').tab('show');
         addMobileStyle();
     }
-    //l = Ladda.create($('#gobtn')[0]); //Ladda.bind( 'input[type=submit]' );//
+    
     directionsDisplay = new google.maps.DirectionsRenderer();
     var mapOptions = {
         zoom: 12,
@@ -143,13 +143,14 @@ function initialize() {
     }
 
     $("#notifications").hide('fast');
-    $("#progressbar").hide('fast');
+
+    spinner = Ladda.create($('#gobtn')[0]); //Ladda.bind( 'input[type=submit]' );//
 }
 
 $("#fsqroute").submit(function (event) {
     event.preventDefault();
     document.getElementById("gobtn").disabled = true;
-    l.start();
+    spinner.start();
     $("#notifications").hide('fast');
     notifications = "";
     start = $.trim(this.start.value);
@@ -157,11 +158,11 @@ $("#fsqroute").submit(function (event) {
     if ((start == "") || (end == "")) {
         $("#notifications").show('fast');
         $("#notifications").html("whoops! please enter both start and end points!");
-        l.stop();
+        spinner.stop();
         document.getElementById("gobtn").disabled = false;
     } else {
         transMethod = this.transport.value;
-
+        
         var posting = $.post('/ajax/roulette', $(this).serialize());
 
         posting.done(function (data) {
@@ -209,8 +210,7 @@ function getDirections() {
             console.log("Directions was not successful for the following reason: " + dirstatus);
         }
     });
-    $("#progressbar").hide('fast');
-    l.stop();
+    spinner.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
@@ -253,10 +253,9 @@ function placeMarker(location) {
 
 function errfunc(data) {
     console.log(data);
-    $("#progressbar").hide('fast');
     $("#notifications").show('fast');
     $("#notifications").html("whoops! we ran into an error. try again!");
-    l.stop();
+    spinner.stop();
     document.getElementById("gobtn").disabled = false;
 }
 
