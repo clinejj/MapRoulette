@@ -104,16 +104,15 @@ form {
 	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
 }
 
+#results-panel .panel-body {
+    padding: 0 12px;
+}
+
 .results-header {
     font-weight: bold;
     padding: 8px;
     font-size: 16px;
     padding-bottom: 0px;
-}
-
-#results-form {
-    padding-left: 8px;
-    padding-right: 8px;
 }
 
 .transport-row {
@@ -123,13 +122,13 @@ form {
 
 #results-form select {
     display: inline-block;
-    width: 94px;
+    width: 90px;
     margin-right: 10px;
 }
 
 #routebtn {
     display: inline-block;
-    width: 94px;
+    width: 90px;
 }
 
 #route-notifications {
@@ -144,8 +143,6 @@ form {
     right: 0;
     z-index: 50;
     background: #fff;
-    padding-left: 8px;
-    padding-right: 8px;
     top: 128px;
     max-height: 400px;
     overflow-y: auto;
@@ -157,6 +154,14 @@ form {
     border-top-left-radius: 5px;
     border: 1px solid #ccc;
 	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+}
+
+#directions-content.panel-body {
+    padding: 0 2px;
+}
+
+#back-results {
+    cursor: pointer;
 }
 			
 #map-canvas {

@@ -95,7 +95,7 @@ function initialize() {
     };
     map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     directionsDisplay.setMap(map);
-    directionsDisplay.setPanel(document.getElementById("directions-panel"));
+    directionsDisplay.setPanel(document.getElementById("directions-content"));
 
     // Try W3C Geolocation (Preferred)
     if (navigator.geolocation) {
@@ -373,10 +373,10 @@ $('#toggle-options').on('click', function (event) {
     }   
 });
 
-$('#back-results').on('click', function (event) {
+$('#directions-panel button').on('click', function (event) {
     event.preventDefault();
     $('#directions-panel').animate({ width: '0px' }, 350);
-    $('#directions-panel').hide();
+    $('#directions-panel').hide(350);
     directionsDisplay.setMap(null);
     showMarkers();
 });

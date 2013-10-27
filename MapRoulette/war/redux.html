@@ -45,8 +45,9 @@
         </div>
         <div id="notifications"></div>
     </div>
-    <div id="results-panel">
-        <div class="results-header">Results:</div>
+    <div id="results-panel" class="panel panel-info">
+        <div class="results-header panel-heading">Results:</div>
+        <div class="panel-body">
         <div id="results-form-container">
             <form id="results-form" role="form">
                 <div id="results-list" class="results-list">    
@@ -58,15 +59,22 @@
                         <option value="biking">biking</option>
                         <option value="walking">walking</option>
                     </select>
-                    <button id="routebtn" type="submit" class="btn btn-primary ladda-button input-sm" data-style="contract"><span class="ladda-label">route</span></button>
+                    <button id="routebtn" type="submit" class="btn btn-info ladda-button input-sm" data-style="contract"><span class="ladda-label">route</span></button>
                 </div>
             </form>
         </div>
         <div id="route-notifications"></div>
+        </div>
     </div>
-    <div id="directions-panel">
-        <div id="directions-header">
-            <a id="back-results">&lt;- back to results</a>
+    <div id="directions-panel" class="panel panel-info">
+        <div id="directions-header" class="panel-heading">
+            <button type="button" class="close">&times;</button>
+            <strong>Directions</strong>
+        </div>
+        <div id="directions-content" class="panel-body">
+        </div>
+        <div id="directions-header" class="panel-body">
+            <button id="back-results" class="btn btn-info">&lt;&lt; back to results</button>
         </div>
     </div>
     <div id="map-canvas"></div>
