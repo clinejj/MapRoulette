@@ -13,13 +13,13 @@
         <h2><a href="about.html">maproulette</a></h2>
         <div id="fsqform">
             <form id="fsqroute" action="/" class="form-inline">
-                <label>start: <input id="fsqstart" type="text" name="start" size="40" value="18th and 6th ave, nyc" /></label>
-                <label>end: <input id="fsqend" type="text" name="end" size="40" value="brooklyn, ny" /></label>
+                <label>start: <input id="fsqstart" type="text" name="start" size="40"/></label>
+                <label>end: <input id="fsqend" type="text" name="end" size="40"/></label>
                 <br>
                 <label>category: 
                     <select name="categories" id="sections">
-                        <option value="all">all</option>
-                        <option value="food" selected>food</option>
+                        <option value="all" selected>all</option>
+                        <option value="food">food</option>
                         <option value="drinks">drinks</option>
                         <option value="coffee">coffee</option>
                         <option value="shops">shops</option>
@@ -27,15 +27,15 @@
                         <option value="outdoors">outdoors</option>
                     </select>
                 </label>
-                <label>search: <input id="search" type="text" name="search" size="40" value="sushi" /></label>
+                <label>search: <input id="search" type="text" name="search" size="40"/></label>
                 <input type="checkbox" name="new" id="newrec" value="new" checked/>
                 <label id="newreclbl" for="newrec">new</label>
                 <input type="checkbox" name="old" id="oldrec" value="old" checked/> 
                 <label id="oldreclbl" for="oldrec">old</label>
                 <select name="transport" id="transport">
-                    <option value="driving">driving</option>
+                    <option value="driving" selected>driving</option>
                     <option value="transit">transit</option>
-                    <option value="biking" selected>biking</option>
+                    <option value="biking">biking</option>
                     <option value="walking">walking</option>
                 </select>
                 <input id="oauth_token" type="hidden" name="oauth_token"/>
