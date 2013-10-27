@@ -73,13 +73,22 @@ public class RouletteServlet extends HttpServlet {
 				final Geocoder geocoder = new Geocoder();
 				GeocoderRequest geocoderRequest = new GeocoderRequestBuilder().setAddress(start).setLanguage("en").getGeocoderRequest();
 				GeocodeResponse geocoderResponse = geocoder.geocode(geocoderRequest);
-				startLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
+				if (geocoderResponse.getStatus().equals(GeocoderStatus.OK)) {
+					startLL = geocoderResponse.getResults().get(0).getGeometry().getLocation();
+				} else {
+					wayResp.addError("Start geocode error: " + geocoderResponse.getStatus().value());
+				}
+				
 				geocoderRequest = new GeocoderRequestBuilder().setAddress(end).setLanguage("en").getGeocoderRequest();
 				geocoderResponse = geocoder.geocode(geocoderRequest);
-				endLL = (geocoderResponse.getStatus().equals(GeocoderStatus.OK) ? geocoderResponse.getResults().get(0).getGeometry().getLocation() : null);
+				if (geocoderResponse.getStatus().equals(GeocoderStatus.OK)) {
+					endLL = geocoderResponse.getResults().get(0).getGeometry().getLocation();
+				} else {
+					wayResp.addError("End geocode error: " + geocoderResponse.getStatus().value());
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				wayResp.addError("Exception thrown during geocoding.");
+				wayResp.addError("Exception thrown during geocoding: " + e.getMessage());
 			}
 			
 			if (startLL != null && endLL != null) {
