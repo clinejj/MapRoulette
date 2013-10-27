@@ -47,3 +47,18 @@ html, body {
     width:  32px;
     margin-left: 34px;
 }
+
+@media (max-width: 490px) {
+    .form-horizontal .control-group {
+        margin-left: 12px;
+    }
+    
+    .form-horizontal .control-label {
+        width: 80px;
+        display: inline-block;
+    }
+
+    .form-horizontal .controls {
+        display: inline-block;
+    }
+}

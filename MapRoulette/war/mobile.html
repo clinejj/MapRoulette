@@ -11,9 +11,9 @@
     <link type="text/css" href="css/mobile.css" rel="stylesheet">
   </head>
   <body>
-    <div id="control">
+    <div id="control" class="container">
         <h2 style="text-align: center"><a href="about-m.html">maproulette</a></h2>
-        <div class="container"><div class="row">
+        <div class="row">
         <div id="fsqform" class="styleform offset3 span6">
             <form id="fsqroute" action="/" class="form-horizontal">
                 <div class="control-group">                   
@@ -59,6 +59,7 @@
                     </div>
                 </div>
                 <div class="control-group">
+                    <label id="transportlbl" for="transport" class="control-label"></label>
                     <div class="controls">
                     <select name="transport" id="transport">
                         <option value="driving" selected>driving</option>
@@ -69,6 +70,7 @@
                     </div>
                 </div>
                 <div class="control-group">
+                    <label id="golbl" for="gobtn" class="control-label"></label>
                     <div class="controls">
                         <input id="oauth_token" type="hidden" name="oauth_token"/>
                         <button id="gobtn" type="submit" class="btn btn-primary ladda-button" data-style="contract"><span class="ladd-label">go</span></button>
@@ -76,7 +78,7 @@
                 </div>
             </form>
         </div>
-        </div></div>
+        </div>
         <div id="notifications"></div>
         <div id="foursquare" class="foursquare">
         <a href="javascript:doAuthRedirect()"><img src="img/connect-white.png" alt="foursquare" style="padding-top: 5px;"></a>
