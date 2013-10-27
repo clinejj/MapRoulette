@@ -6,7 +6,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServlet;
@@ -18,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.appengine.api.urlfetch.HTTPRequest;
 import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
@@ -143,7 +141,7 @@ public class RouletteServlet extends HttpServlet {
                     waypoints.add(curWP);
                 }
                 
-                List<HTTPResponse> responses = Lists.newArrayList();
+                List<Future<HTTPResponse>> responses = Lists.newArrayList();
                 for (LatLng waypoint : waypoints) {
                 	fetch = URLFetchServiceFactory.getURLFetchService();
                 	StringBuilder urlBuilder = new StringBuilder("https://api.foursquare.com/v2/venues/explore?ll=");
@@ -174,26 +172,20 @@ public class RouletteServlet extends HttpServlet {
                 		}
                 		
                 	}
-                	URL reqUrl = new URL(urlBuilder.toString());
-                	HTTPRequest fsqreq = new HTTPRequest(reqUrl);
-                	try {
-						responses.add(fetch.fetchAsync(fsqreq).get());
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						e.printStackTrace();
-					}
+                	
+                	responses.add(fetch.fetchAsync(new URL(urlBuilder.toString())));
                 }
                 
                 List<RecommendationGroup> foursquareResults = Lists.newArrayList();
-                for (HTTPResponse fsqresp : responses) {
-                	FoursquareApiRequestResponse response = handleApiResponse(
-		                			new Response(new String(fsqresp.getContent(), "UTF-8"), 
-		                			fsqresp.getResponseCode(), 
-		                			null));
-             	
-                    if (response.getMeta().getCode() == 200) {
-                    	try {
+                for (Future<HTTPResponse> futureFsqresp : responses) {
+                	try {
+	                	HTTPResponse fsqresp = futureFsqresp.get();
+	                	FoursquareApiRequestResponse response = handleApiResponse(
+			                			new Response(new String(fsqresp.getContent(), "UTF-8"), 
+			                			fsqresp.getResponseCode(), 
+			                			null));
+	             	
+	                    if (response.getMeta().getCode() == 200) {
 							RecommendationGroup[] groups = (RecommendationGroup[]) JSONFieldParser.parseEntities(
 											RecommendationGroup.class, 
 											response.getResponse().getJSONArray("groups"), 
@@ -202,10 +194,11 @@ public class RouletteServlet extends HttpServlet {
 								if (groups[0].getItems().length > 0)
 									foursquareResults.add(groups[0]);
 							}
-                    	} catch (Exception e) {
-                    		e.printStackTrace();
-                    	}
-                    }
+	                    	
+	                    }
+                	} catch (Exception e) {
+                		e.printStackTrace();
+                	}
                 }
                 
                 List<CompactVenue> venueResults = Lists.newArrayList();

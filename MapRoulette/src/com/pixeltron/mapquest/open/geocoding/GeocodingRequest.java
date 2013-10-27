@@ -27,7 +27,7 @@ public class GeocodingRequest {
 		if (thumbMaps != null) {
 			urlBuilder.append("&thumbMaps=").append(thumbMaps);
 		}
-		System.out.println(urlBuilder.toString());
+
 		return urlBuilder.toString();
 	}
 	
