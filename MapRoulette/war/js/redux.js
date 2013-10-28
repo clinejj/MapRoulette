@@ -263,8 +263,6 @@ function getWaypointDisplay(index) {
 
 function showResults() {
     wayMarkers = [];
-    displayEndpoint(startEndpoint);
-    displayEndpoint(endEndpoint);
     for (var i = 0; i < waypointsFull.length; i++) {
         displayWaypoint(waypointsFull[i]);
         var waypointHTML = generateWaypointFormHTML(waypointsFull[i], i);
@@ -276,6 +274,8 @@ function showResults() {
         map.panTo(marker.getPosition());
         map.setZoom(14);
     });
+    displayEndpoint(startEndpoint);
+    displayEndpoint(endEndpoint);
     map.panTo(new google.maps.LatLng(startEndpoint.location.lat, startEndpoint.location.lng));
     $('#results-panel').show();
     $("#results-panel").animate({width:'238px'},350);
