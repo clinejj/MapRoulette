@@ -276,6 +276,7 @@ function showResults() {
         map.panTo(marker.getPosition());
         map.setZoom(14);
     });
+    map.panTo(new google.maps.LatLng(startEndpoint.location.lat, startEndpoint.location.lng));
     $('#results-panel').show();
     $("#results-panel").animate({width:'238px'},350);
     goSpinner.stop();

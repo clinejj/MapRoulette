@@ -88,7 +88,7 @@ form {
     display: none;
     z-index: 30;
 	width: 0px;
-	max-height: 400px;
+	max-height: 450px;
     position: fixed;
     right: 0;
     top: 128px;
@@ -129,17 +129,18 @@ form {
 
 #results-form select {
     display: inline-block;
-    width: 90px;
+    width: 94px;
     margin-right: 10px;
 }
 
 #routebtn {
     display: inline-block;
-    width: 90px;
+    width: 94px;
 }
 
 #route-notifications {
-    padding: 8px;
+    padding: 0 12px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
@@ -152,7 +153,6 @@ form {
     background: #fff;
     top: 128px;
     max-height: 400px;
-    overflow-y: auto;
     -webkit-border-top-left-radius: 5px;
     -moz-border-top-left-radius: 5px;
     border-top-left-radius: 5px;
@@ -165,6 +165,9 @@ form {
 
 #directions-content.panel-body {
     padding: 0 2px;
+    padding-bottom: 12px;
+    overflow-y: auto;
+    max-height: 358px;
 }
 
 #back-results {
