@@ -270,10 +270,11 @@ function showResults() {
         var waypointHTML = generateWaypointFormHTML(waypointsFull[i], i);
         $('#results-list').append(waypointHTML);
     }
-    $('#results-list address').on('click', function(event) {
+    $('#results-list address').on('click', function (event) {
         var index = $('input', this).val();
-        var waypoint = waypointsFull[index];
-        map.setCenter(new google.maps.LatLng(waypoint.location.lat, waypoint.location.lng));
+        var marker = wayMarkers[index];
+        map.panTo(marker.getPosition());
+        map.setZoom(14);
     });
     $('#results-panel').show();
     $("#results-panel").animate({width:'238px'},350);
@@ -283,8 +284,7 @@ function showResults() {
 
 function displayWaypoint(waypoint) {
     var latlng = new google.maps.LatLng(waypoint.location.lat, waypoint.location.lng);
-    var prefix = waypoint.categories[0].icon.prefix.replace('_v2', '');
-    var imageUrl = prefix + '32' + waypoint.categories[0].icon.suffix;
+    var imageUrl = waypoint.categories[0].icon.prefix + 'bg_32' + waypoint.categories[0].icon.suffix;
     var marker = new google.maps.Marker({
         position: latlng,
         map: map,

@@ -89,7 +89,6 @@ form {
     z-index: 30;
 	width: 0px;
 	max-height: 400px;
-    overflow-y: auto;
     position: fixed;
     right: 0;
     top: 128px;
@@ -105,7 +104,7 @@ form {
 }
 
 #results-panel .panel-body {
-    padding: 0 12px;
+    padding: 0;
 }
 
 .results-header {
@@ -115,9 +114,17 @@ form {
     padding-bottom: 0px;
 }
 
+#results-list {
+    overflow-y: auto;
+    max-height: 322px;
+    padding: 0 12px;
+}
+
 .transport-row {
-    margin-top: 8px;
+    border-top: 1px solid #ccc;
     margin-bottom: 8px;
+    padding: 0 12px;
+    padding-top: 8px;
 }
 
 #results-form select {
