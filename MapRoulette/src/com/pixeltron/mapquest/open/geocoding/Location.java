@@ -22,4 +22,7 @@ public class Location {
 	public String geocodeQuality;
 	public String geocodeQualityCode;
 	
+	public String toString() {
+		return this.latLng.toString();
+	}
 }

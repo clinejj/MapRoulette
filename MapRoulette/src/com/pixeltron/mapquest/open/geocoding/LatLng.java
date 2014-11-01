@@ -21,4 +21,8 @@ public class LatLng {
     public String toUrlValue(int precision) {
         return lat.setScale(precision, BigDecimal.ROUND_HALF_EVEN).toString() + "," + lng.setScale(precision, BigDecimal.ROUND_HALF_EVEN).toString();
     }
+    
+    public String toString() {
+    	return toUrlValue();
+    }
 }
