@@ -1,0 +1,2 @@
+serviceClass: com.csoft.maproulette.client.GreetingService
+path: 8E924F9AC84F7AB9A5F079444AAEAD01.gwt.rpc

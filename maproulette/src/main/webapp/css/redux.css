@@ -1,0 +1,180 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+             
+label {
+  display: inline;
+  padding:  3px;
+}
+             
+button {
+  vertical-align: inherit;
+}
+
+form {
+  margin: 0px;
+}
+
+.adp-text {
+    padding-left: 30px;
+}
+			
+#control {
+	background: #fff;
+	padding: 5px;
+	font-size: 14px;
+	font-family: Arial;
+	border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+    text-align: center;
+    position: fixed;
+    width: 720px;
+    z-index: 30;
+    left: 50%;
+    top: 28px;
+    margin-left: -314px;
+    padding: 8px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#control label {
+    font-weight: normal;
+}
+
+#control input {
+    width:  210px;
+}
+
+#control select {
+    width: 80px;
+}
+
+#toggle-options {
+    border:  none;
+}
+
+#search-options {
+    display: none;
+    margin-top: 8px;
+}
+
+#search-options #newrec, #search-options #oldrec {
+    width:  30px;
+}
+
+#recbuttons {
+    display: none;
+}
+
+#foursquare {
+    display: inline-block;
+    vertical-align: top;
+}
+
+#notifications {
+    display: none;
+}
+
+.ladda-button[data-style=contract][data-loading] {
+    width:  32px;
+    margin-left: 8px;
+}
+
+#results-panel {
+    display: none;
+    z-index: 30;
+	width: 0px;
+	max-height: 450px;
+    position: fixed;
+    right: 0;
+    top: 128px;
+    background: #fff;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+}
+
+#results-panel .panel-body {
+    padding: 0;
+}
+
+.results-header {
+    font-weight: bold;
+    padding: 8px;
+    font-size: 16px;
+    padding-bottom: 0px;
+}
+
+#results-list {
+    overflow-y: auto;
+    max-height: 322px;
+    padding: 0 12px;
+}
+
+.transport-row {
+    border-top: 1px solid #ccc;
+    margin-bottom: 8px;
+    padding: 0 12px;
+    padding-top: 8px;
+}
+
+#results-form select {
+    display: inline-block;
+    width: 94px;
+    margin-right: 10px;
+}
+
+#routebtn {
+    display: inline-block;
+    width: 94px;
+}
+
+#route-notifications {
+    padding: 0 12px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+#directions-panel {
+    position: fixed;
+    display: none;
+    width: 0px;
+    right: 0;
+    z-index: 50;
+    background: #fff;
+    top: 128px;
+    max-height: 400px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+    -moz-border-top-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border: 1px solid #ccc;
+	box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);
+}
+
+#directions-content.panel-body {
+    padding: 0 2px;
+    padding-bottom: 12px;
+    overflow-y: auto;
+    max-height: 358px;
+}
+
+#back-results {
+    cursor: pointer;
+}
+			
+#map-canvas {
+	width:  100%;
+    height:  100%;
+}
