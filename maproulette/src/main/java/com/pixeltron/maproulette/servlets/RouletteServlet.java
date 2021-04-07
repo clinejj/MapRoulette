@@ -23,9 +23,10 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
-import com.pixeltron.mapquest.open.geocoding.GeocodingRequest;
 import com.pixeltron.mapquest.open.geocoding.GeocodingResponse;
 import com.pixeltron.mapquest.open.geocoding.LatLng;
+import com.pixeltron.mapquest.open.geocoding.RequestMaker;
+import com.pixeltron.mapquest.open.geocoding.RequestParameters;
 import com.pixeltron.maproulette.models.EndpointModel;
 import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
 import com.pixeltron.maproulette.responses.WaypointResponse;
@@ -51,26 +52,19 @@ public class RouletteServlet extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {		
-		String start = req.getParameter("start");
-		String end = req.getParameter("end");
-		String categories = req.getParameter("categories");
-		String search = req.getParameter("search");
-		String checkNew = req.getParameter("new");
-		String checkOld = req.getParameter("old");
-		String oauth_token = req.getParameter("oauth_token");
-		String responseBody = "";
+		RequestMaker request_maker = new RequestMaker();
+		RequestParameters parameters = new RequestParameters(req);
 		
 		Gson gson = new Gson();
 		WaypointResponse wayResp = new WaypointResponse();
 		
-		if (StringUtils.isNotBlank(start) && StringUtils.isNotBlank(end)) {
+		if (StringUtils.isNotBlank(parameters.start) && StringUtils.isNotBlank(parameters.end)) {
 			LatLng startLL = null;
 			LatLng endLL = null;
 			
 			URLFetchService fetch = URLFetchServiceFactory.getURLFetchService();
-			GeocodingRequest geoReq = new GeocodingRequest();
 
-			Future<HTTPResponse> geoFuture = fetch.fetchAsync(new URL(geoReq.buildUrl(start, end, false)));
+			Future<HTTPResponse> geoFuture = fetch.fetchAsync(new URL(request_maker.makeGeocodingRequest(parameters)));
         	try {
         		HTTPResponse geoResp = geoFuture.get();
         		if (geoResp.getResponseCode() == 200) {
@@ -109,8 +103,8 @@ public class RouletteServlet extends HttpServlet {
                 double distance = Math.sqrt(rise * rise + run * run) * CONV_MI_LL;
                 double wpDist = distance / numWaypoints;
                 if (numWaypoints == 0) wpDist = distance;
-                int rad = Ints.checkedCast(Math.round(wpDist * CONV_MI_M) / 2);
-                if (rad > 35000) rad = 35000;
+                parameters.rad = Ints.checkedCast(Math.round(wpDist * CONV_MI_M) / 2);
+                if (parameters.rad > 35000) parameters.rad = 35000;
                 
                 // Build waypoints
                 LatLng nextWP = new LatLng();
@@ -144,37 +138,9 @@ public class RouletteServlet extends HttpServlet {
                 
                 List<Future<HTTPResponse>> responses = Lists.newArrayList();
                 for (LatLng waypoint : waypoints) {
-                	fetch = URLFetchServiceFactory.getURLFetchService();
-                	StringBuilder urlBuilder = new StringBuilder("https://api.foursquare.com/v2/venues/explore?ll=");
-                	urlBuilder.append(waypoint.toUrlValue());
-                	urlBuilder.append("&limit=6&client_id=GWCCYYFINDKJ1A3JUY0KMUAEXX5UQ0EGHTQPPGUGLTVAKNUK&client_secret=JYUTNCPVW4K0JLGFYS3ROLHHDEFPZOJSPP2R0RJHZBTOCQJO&v=20131013");
-                	if (StringUtils.isNotBlank(categories)) {
-                		urlBuilder.append("&section=");
-                		urlBuilder.append(categories);
-                	}
-                	if (StringUtils.isNotBlank(search)) {
-                		urlBuilder.append("&query=");
-                		urlBuilder.append(URLEncoder.encode(search, "UTF-8"));
-                	}
-                	urlBuilder.append("&radius=");
-                	urlBuilder.append(rad);
-                	if (StringUtils.isNotBlank(oauth_token)) {
-                		urlBuilder.append("&oauth_token=");
-                		urlBuilder.append(URLEncoder.encode(oauth_token, "UTF-8"));
-                		urlBuilder.append("&novelty=");
-                		if (StringUtils.isNotBlank(checkNew)) {
-                			if (StringUtils.isNotBlank(checkOld)) {
-                    			urlBuilder.append("both");
-                    		} else {
-                    			urlBuilder.append(checkNew);
-                    		}
-                		} else {
-                			urlBuilder.append(checkOld);
-                		}
-                		
-                	}
-                	
-                	responses.add(fetch.fetchAsync(new URL(urlBuilder.toString())));
+                    fetch = URLFetchServiceFactory.getURLFetchService();
+                    parameters.waypoint = waypoint;
+                    responses.add(fetch.fetchAsync(new URL(request_maker.makeFoursquareRequest(parameters))));
                 }
                 
                 List<RecommendationGroup> foursquareResults = Lists.newArrayList();
@@ -222,7 +188,7 @@ public class RouletteServlet extends HttpServlet {
                 
                 if (venueResults.size() > 0) {
                 	wayResp.setData(venueResults);
-                	wayResp.setEndpoints(new EndpointModel(start, startLL), new EndpointModel(end, endLL));
+                    wayResp.setEndpoints(new EndpointModel(parameters.start, startLL), new EndpointModel(parameters.end, endLL));
                 } else {
                 	wayResp.addError("Venue results was size 0");
                 }
@@ -234,9 +200,9 @@ public class RouletteServlet extends HttpServlet {
 		}
 		
 		wayResp.prepareForTransport();
-		responseBody = gson.toJson(wayResp);
+		parameters.responseBody = gson.toJson(wayResp);
 		resp.setCharacterEncoding("UTF-8");
-		resp.getOutputStream().println(responseBody);
+		resp.getOutputStream().println(parameters.responseBody);
 	}
 
 	/**
