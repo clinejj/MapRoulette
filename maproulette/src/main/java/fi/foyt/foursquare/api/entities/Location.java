@@ -111,6 +111,24 @@ public class Location implements FoursquareEntity {
   public Double getDistance() {
     return distance;
   }
+  
+  /**
+   * Sets latitude
+   *
+   * @param latitude value to set lat to
+   */
+  public void setLat(Double latitude){
+    lat = latitude;
+  }
+  
+  /**
+   * Sets longitude
+   *
+   * @param longitude value to set lng to
+   */
+  public void setLng(Double longitude){
+    lng = longitude;
+  }
 
   private String address;
   private String crossStreet;
