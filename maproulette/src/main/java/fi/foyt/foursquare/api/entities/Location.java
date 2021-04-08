@@ -115,7 +115,7 @@ public class Location implements FoursquareEntity {
   /**
    * Sets latitude
    *
-   * @param latitude value to set lat to
+   * @param latitude Double value to set lat to
    */
   public void setLat(Double latitude){
     lat = latitude;
@@ -124,7 +124,7 @@ public class Location implements FoursquareEntity {
   /**
    * Sets longitude
    *
-   * @param longitude value to set lng to
+   * @param longitude Double value to set lng to
    */
   public void setLng(Double longitude){
     lng = longitude;
