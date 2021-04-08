@@ -130,6 +130,15 @@ public class CompactVenue implements FoursquareEntity {
   public TodoGroup getTodos() {
     return todos;
   }
+  
+  /**
+   * Sets location
+   *
+   * @param loc Location to set location to
+   */
+  public void setLocation(Location loc){
+    location = loc;
+  }
 
   private String id;
   private String name;
