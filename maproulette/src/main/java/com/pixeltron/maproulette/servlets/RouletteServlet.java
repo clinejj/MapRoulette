@@ -171,7 +171,7 @@ public class RouletteServlet extends HttpServlet {
 				List<CompactVenue> venueResults = Lists.newArrayList();
                 VenueListFactory venueListFactory = new VenueListFactory();
 				VenueList venueList = venueListFactory.getVenueList("FOURSQUARE");
-				venueResults = venueList.createVenueList(foursquareResults);
+				venueResults = venueList.createVenueList(waypoints, foursquareResults);
                 
                 if (venueResults.size() > 0) {
                 	wayResp.setData(venueResults);

@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.pixeltron.mapquest.open.geocoding.LatLng;
 import fi.foyt.foursquare.api.entities.CompactVenue;
 import fi.foyt.foursquare.api.entities.Location;
+import fi.foyt.foursquare.api.entities.RecommendationGroup;
 
 public class SimpleVenueList extends VenueList{
 	
@@ -16,7 +17,7 @@ public class SimpleVenueList extends VenueList{
 	 * @return List of CompactVenues with only latitude/longitude coordinates
 	 */
 	@Override
-	public List<CompactVenue> createVenueList(List<LatLng> waypoints){
+	public List<CompactVenue> createVenueList(List<LatLng> waypoints, List<RecommendationGroup> foursquareResults){
 		List<CompactVenue> simpleVenues = Lists.newArrayList();
 		
 		//Populate list
