@@ -23,9 +23,11 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.gson.Gson;
+import com.pixeltron.mapquest.open.geocoding.FoursquareRequestParameters;
+import com.pixeltron.mapquest.open.geocoding.GeocodingRequestParameters;
 import com.pixeltron.mapquest.open.geocoding.GeocodingResponse;
 import com.pixeltron.mapquest.open.geocoding.LatLng;
-import com.pixeltron.mapquest.open.geocoding.RequestMaker;
+import com.pixeltron.mapquest.open.geocoding.RequestBuilder;
 import com.pixeltron.mapquest.open.geocoding.RequestParameters;
 import com.pixeltron.maproulette.models.EndpointModel;
 import com.pixeltron.maproulette.models.FoursquareApiRequestResponse;
@@ -52,8 +54,8 @@ public class RouletteServlet extends HttpServlet {
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {		
-		RequestMaker request_maker = new RequestMaker();
-		RequestParameters parameters = new RequestParameters(req);
+		RequestParameters parameters = new GeocodingRequestParameters(req);
+		RequestBuilder requestBuilder = new RequestBuilder(parameters);
 		
 		Gson gson = new Gson();
 		WaypointResponse wayResp = new WaypointResponse();
@@ -64,7 +66,7 @@ public class RouletteServlet extends HttpServlet {
 			
 			URLFetchService fetch = URLFetchServiceFactory.getURLFetchService();
 
-			Future<HTTPResponse> geoFuture = fetch.fetchAsync(new URL(request_maker.makeGeocodingRequest(parameters)));
+			Future<HTTPResponse> geoFuture = fetch.fetchAsync(new URL(requestBuilder.buildGeocodingRequest()));
         	try {
         		HTTPResponse geoResp = geoFuture.get();
         		if (geoResp.getResponseCode() == 200) {
@@ -91,6 +93,8 @@ public class RouletteServlet extends HttpServlet {
 				wayResp.addError("Exception thrown during geocoding: " + e.getMessage());
 			}
 			
+			parameters = new FoursquareRequestParameters(req);
+
 			if (startLL != null && endLL != null) {
 				// Set up math variables
 				Random rand = new Random();
@@ -140,7 +144,7 @@ public class RouletteServlet extends HttpServlet {
                 for (LatLng waypoint : waypoints) {
                     fetch = URLFetchServiceFactory.getURLFetchService();
                     parameters.waypoint = waypoint;
-                    responses.add(fetch.fetchAsync(new URL(request_maker.makeFoursquareRequest(parameters))));
+                    responses.add(fetch.fetchAsync(new URL(requestBuilder.buildFoursquareRequest())));
                 }
 
 				List<RecommendationGroup> foursquareResults = Lists.newArrayList();

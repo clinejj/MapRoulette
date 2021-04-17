@@ -5,12 +5,12 @@ import java.net.URLEncoder;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class FoursquareRequest implements Request {
+public class FoursquareRequest implements Request<FoursquareRequestParameters> {
 
     private String BASE_URL = "https://api.foursquare.com/v2/venues/explore?ll=";
     private String DATA = "&limit=6&client_id=GWCCYYFINDKJ1A3JUY0KMUAEXX5UQ0EGHTQPPGUGLTVAKNUK&client_secret=JYUTNCPVW4K0JLGFYS3ROLHHDEFPZOJSPP2R0RJHZBTOCQJO&v=20131013";
 
-    public String buildUrl(RequestParameters parameters) throws UnsupportedEncodingException {
+    public String buildUrl(FoursquareRequestParameters parameters) throws UnsupportedEncodingException {
         StringBuilder urlBuilder = new StringBuilder(BASE_URL);
         urlBuilder.append(parameters.waypoint.toUrlValue());
         urlBuilder.append(DATA);

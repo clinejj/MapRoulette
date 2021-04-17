@@ -1,19 +1,21 @@
 package com.pixeltron.mapquest.open.geocoding;
 
-public class RequestMaker {
+public class RequestBuilder {
 
+    private RequestParameters parameters;
     private Request geoReq, fsReq;
 
-    public RequestMaker() {
+    public RequestBuilder(RequestParameters parameters) {
+        this.parameters = parameters;
         this.geoReq = new GeocodingRequest();
         this.fsReq = new FoursquareRequest();
     }
 
-    public String makeGeocodingRequest(RequestParameters parameters) {
+    public String buildGeocodingRequest() {
         String ret_val = null;
 
         try {
-            ret_val = this.geoReq.buildUrl(parameters);
+            ret_val = this.geoReq.buildUrl(this.parameters);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -21,11 +23,11 @@ public class RequestMaker {
         return ret_val;
     }
 
-    public String makeFoursquareRequest(RequestParameters parameters) {
+    public String buildFoursquareRequest() {
         String ret_val = null;
 
         try {
-            ret_val = this.fsReq.buildUrl(parameters);
+            ret_val = this.fsReq.buildUrl(this.parameters);
         } catch (Exception e) {
             e.printStackTrace();
         }
