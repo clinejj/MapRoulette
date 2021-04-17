@@ -9,7 +9,7 @@ public class VenueListFactory {
         }
 
         if (venueListType.equalsIgnoreCase("SIMPLE")) {
-            // return new SimpleVenueList();
+            return new SimpleVenueList();
         }
 
         if (venueListType.equalsIgnoreCase("FOURSQUARE")) {
